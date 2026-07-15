@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #04060a;
+    color: #f8fafc;
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+}
+
+@layer components {
+  .class-banner {
+    @apply h-[26px] flex items-center justify-center font-mono text-[10px] font-bold tracking-[2.5px] uppercase fixed left-0 right-0 z-[10000];
+  }
+  .class-banner.top {
+    @apply top-0;
+    background: repeating-linear-gradient(45deg, #fbbf24, #fbbf24 10px, #000 10px, #000 20px);
+    color: #000;
+    border-bottom: 2px solid #fbbf24;
+  }
+  .class-banner.bottom {
+    @apply bottom-0;
+    background: repeating-linear-gradient(45deg, #fbbf24, #fbbf24 10px, #000 10px, #000 20px);
+    color: #000;
+    border-top: 2px solid #fbbf24;
+  }
+}
+
+@layer utilities {
+  .scrollbar-nato::-webkit-scrollbar { width: 5px; height: 5px; }
+  .scrollbar-nato::-webkit-scrollbar-track { background: #0d111c; }
+  .scrollbar-nato::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+  .scrollbar-nato::-webkit-scrollbar-thumb:hover { background: #06b6d4; }
+}
