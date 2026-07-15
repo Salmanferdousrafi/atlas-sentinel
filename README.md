@@ -1,6 +1,6 @@
 <div align="center">
 
-# ⚡ ATLAS SENTINEL
+#  ATLAS SENTINEL
 
 ### *Global Crisis Intelligence Platform*
 
@@ -12,13 +12,13 @@
 
 **NATO STANAG 4609 Compliant | Multi-Theater C2 | ISO 27001 Ready**
 
-[🔴 Live Demo](https://atlas-sentinel.vercel.app) · [📖 Documentation](https://github.com/yourname/atlas-sentinel/wiki) · [🐛 Issues](https://github.com/yourname/atlas-sentinel/issues)
+[ Live Demo](https://atlas-sentinel.vercel.app) · [ Documentation](https://github.com/yourname/atlas-sentinel/wiki) · [ Issues](https://github.com/yourname/atlas-sentinel/issues)
 
 </div>
 
 ---
 
-## 🏛️ The Myth
+##  The Myth
 
 > *"Atlas bore the heavens upon his shoulders — not merely the sky, but the weight of the world entire. When crisis looms, when empires tremble, when the threads of civilization fray... someone must stand watch."*
 
@@ -26,7 +26,7 @@
 
 ---
 
-## 🎯 What It Does
+##  What It Does
 
 Atlas Sentinel provides **real-time situational awareness** across five operational domains:
 
@@ -40,7 +40,7 @@ Atlas Sentinel provides **real-time situational awareness** across five operatio
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 atlas-sentinel/
@@ -75,7 +75,7 @@ atlas-sentinel/
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ```bash
 # 1. Clone the repository
@@ -105,7 +105,7 @@ Or connect your GitHub repo to [Vercel](https://vercel.com) for auto-deploy on e
 
 ---
 
-## 🧩 For Developers
+##  For Developers
 
 ### Swapping Data for Real APIs
 
@@ -148,7 +148,7 @@ colors: {
 
 ---
 
-## 📋 Standards Compliance
+##  Standards Compliance
 
 | Standard | Implementation |
 |----------|---------------|
@@ -159,7 +159,7 @@ colors: {
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Framework:** Next.js 15 (App Router)
 - **Runtime:** React 19
@@ -171,7 +171,7 @@ colors: {
 
 ---
 
-## 🌍 Why "Atlas Sentinel"?
+##  Why "Atlas Sentinel"?
 
 In Greek mythology, **Atlas** was the Titan condemned to hold up the celestial heavens for eternity. A **Sentinel** is a soldier or guard whose job is to stand and keep watch. Together, they represent the eternal vigilance required to protect civilization — the same vigilance this platform enables.
 
