@@ -1,47 +1,54 @@
 "use client";
 
+import { cn } from "@/app/lib/utils";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { KpiMetric } from "@/app/types";
+
 interface KpiCardProps {
-  label: string;
-  value: string;
-  badge: string;
-  badgeClass: string;
-  valueClass: string;
-  delta: string;
-  deltaClass: string;
-  variant?: "critical" | "warning" | "success" | "default";
+  metric: KpiMetric;
+  className?: string;
 }
 
-const beforeColors = {
-  critical: "before:bg-accent-red",
-  warning: "before:bg-accent-amber",
-  success: "before:bg-accent-green",
-  default: "before:bg-cyan",
-};
+export function KpiCard({ metric, className }: KpiCardProps) {
+  const TrendIcon =
+    metric.trend === "up"
+      ? TrendingUp
+      : metric.trend === "down"
+      ? TrendingDown
+      : Minus;
 
-export default function KpiCard({
-  label,
-  value,
-  badge,
-  badgeClass,
-  valueClass,
-  delta,
-  deltaClass,
-  variant = "default",
-}: KpiCardProps) {
+  const trendColor =
+    metric.trend === "up"
+      ? "text-emerald-400"
+      : metric.trend === "down"
+      ? "text-crimson"
+      : "text-slate-500";
+
   return (
     <div
-      className={`bg-panel border border-border-dim rounded-md px-[18px] py-4 relative transition-all hover:border-border-med hover:-translate-y-px hover:shadow-md ${
-        beforeColors[variant]
-      } before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[2px] before:opacity-70 before:rounded-t-md`}
+      className={cn(
+        "rounded-lg border border-border bg-surface p-4 transition-all hover:border-cyan/20 hover:bg-surface-elevated",
+        className
+      )}
     >
-      <div className="flex justify-between items-start mb-2.5">
-        <span className="font-mono text-[9px] font-bold text-text-muted uppercase tracking-wider">{label}</span>
-        <span className={`font-mono text-[9px] font-bold px-1.5 py-0.5 rounded-[3px] tracking-wide ${badgeClass}`}>
-          {badge}
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] font-mono uppercase tracking-wider text-slate-500">
+          {metric.label}
+        </span>
+        <div className={cn("flex items-center gap-1", trendColor)}>
+          <TrendIcon className="h-3 w-3" />
+          <span className="text-[10px] font-mono">
+            {metric.change > 0 ? "+" : ""}
+            {metric.change}
+            {metric.unit}
+          </span>
+        </div>
+      </div>
+      <div className="mt-2">
+        <span className="text-2xl font-mono font-bold text-slate-100">
+          {metric.value}
         </span>
       </div>
-      <div className={`font-mono text-2xl font-bold tracking-tight mb-1.5 ${valueClass}`}>{value}</div>
-      <div className={`font-mono text-[10px] font-semibold flex items-center gap-1 ${deltaClass}`}>{delta}</div>
     </div>
   );
 }

@@ -1,191 +1,272 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import NatoPanel from "./NatoPanel";
-import { mapRegions } from "../data/crisisData";
+import { useState } from "react";
+import { NatoPanel } from "./NatoPanel";
+import { Badge } from "@/components/ui/badge";
+import { crisisEvents, regionData } from "@/app/data/crisisData";
+import { getThreatHex, cn } from "@/app/lib/utils";
+import { MapPin, Filter, Eye } from "lucide-react";
 
-interface TooltipData {
-  name: string;
-  lat: string;
-  lon: string;
-  crises: number;
-  sev: string;
-  sevClass: string;
-}
+const categoryFilters = ["ALL", "MARITIME", "CYBER", "CONVENTIONAL", "HUMANITARIAN", "SAR", "NATURAL"];
 
-export default function CopView() {
-  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
-  const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const [coords, setCoords] = useState("LAT/LON: 00.000°N 000.000°E");
-  const mapRef = useRef<SVGSVGElement>(null);
+export function CopView() {
+  const [activeFilter, setActiveFilter] = useState("ALL");
+  const [hoveredEvent, setHoveredEvent] = useState<string | null>(null);
 
-  const handleMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
-    const rect = mapRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const x = ((e.clientX - rect.left) / rect.width) * 1000;
-    const y = ((e.clientY - rect.top) / rect.height) * 520;
-    const lat = (90 - (y / 520) * 180).toFixed(2);
-    const lon = ((x / 1000) * 360 - 180).toFixed(2);
-    const latDir = parseFloat(lat) >= 0 ? "N" : "S";
-    const lonDir = parseFloat(lon) >= 0 ? "E" : "W";
-    setCoords(`LAT/LON: ${Math.abs(parseFloat(lat)).toFixed(3)}°${latDir} ${Math.abs(parseFloat(lon)).toFixed(3)}°${lonDir}`);
-  }, []);
+  const filteredEvents =
+    activeFilter === "ALL"
+      ? crisisEvents
+      : crisisEvents.filter((e) => e.category === activeFilter);
 
-  const handleRegionEnter = useCallback((key: string, e: React.MouseEvent) => {
-    const data = mapRegions[key];
-    if (!data) return;
-    setTooltip(data);
-    setTooltipPos({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleRegionMove = useCallback((e: React.MouseEvent) => {
-    setTooltipPos({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleRegionLeave = useCallback(() => {
-    setTooltip(null);
-  }, []);
-
-  const landmasses = [
-    { id: "na", d: "M120,60 L280,50 L320,100 L300,160 L240,180 L200,170 L160,150 L130,120 L110,90 Z", crisis: "crisis-3" },
-    { id: "sa", d: "M240,240 L300,230 L330,300 L310,380 L270,400 L240,370 L220,320 L230,280 Z", crisis: "crisis-3" },
-    { id: "eu", d: "M460,80 L530,70 L560,100 L550,140 L500,150 L460,140 L440,110 Z", crisis: "crisis-1" },
-    { id: "ru", d: "M540,60 L780,50 L820,100 L780,150 L680,160 L580,140 L550,100 Z", crisis: "crisis-1" },
-    { id: "me", d: "M520,150 L580,140 L600,190 L560,210 L530,200 L510,180 Z", crisis: "crisis-1" },
-    { id: "ea", d: "M510,240 L570,230 L590,280 L560,310 L520,300 L500,270 Z", crisis: "crisis-2" },
-    { id: "nafr", d: "M450,180 L520,170 L540,210 L500,230 L450,220 L430,200 Z", crisis: "crisis-2" },
-    { id: "sa-asia", d: "M600,160 L680,150 L700,210 L660,240 L620,230 L590,200 Z", crisis: "crisis-2" },
-    { id: "sea", d: "M680,200 L780,190 L800,250 L760,280 L700,270 L680,240 Z", crisis: "crisis-2" },
-    { id: "ea-asia", d: "M700,120 L820,110 L850,170 L800,200 L720,190 L690,160 Z", crisis: "crisis-3" },
-    { id: "oc", d: "M780,320 L880,310 L900,370 L860,400 L780,390 L760,360 Z", crisis: "crisis-3" },
-    { id: "ca", d: "M200,180 L250,170 L270,200 L240,220 L200,210 L190,195 Z", crisis: "crisis-2" },
-  ];
-
-  const markers = [
-    { cx: 545, cy: 115, label: "UKR", ping: true, color: "#dc2626" },
-    { cx: 555, cy: 175, label: "GAZA", ping: true, color: "#dc2626" },
-    { cx: 545, cy: 265, label: "SUD", ping: false, color: "#f59e0b" },
-    { cx: 730, cy: 220, label: "MMR", ping: false, color: "#f59e0b" },
-    { cx: 790, cy: 170, label: "TW", ping: true, color: "#dc2626" },
-    { cx: 540, cy: 195, label: "RED", ping: false, color: "#f59e0b" },
-    { cx: 220, cy: 140, label: "GULF", ping: true, color: "#dc2626" },
-    { cx: 280, cy: 250, label: "VEN", ping: false, color: "#f59e0b" },
-  ];
+  // Map coordinates to SVG viewBox (0-1000 x 500)
+  const mapX = (lon: number) => ((lon + 180) / 360) * 1000;
+  const mapY = (lat: number) => ((90 - lat) / 180) * 500;
 
   return (
-    <NatoPanel
-      title="Common Operating Picture (COP) — Global"
-      icon="◎"
-      iconBg="rgba(6,182,212,0.08)"
-      iconColor="#06b6d4"
-      actions={["ALL", "IMINT", "SIGINT", "HUMINT", "OSINT"].map((btn, i) => (
-        <button
-          key={btn}
-          className={`px-3 py-[5px] rounded-sm border text-[11px] font-semibold cursor-pointer transition-all ${
-            i === 0
-              ? "border-cyan/25 bg-cyan/[0.08] text-cyan"
-              : "border-border-dim bg-tertiary text-text-muted hover:border-border-med hover:text-text-secondary"
-          }`}
-        >
-          {btn}
-        </button>
-      ))}
-      className="animate-fade-in"
-    >
-      <div className="relative w-full h-[540px] bg-secondary rounded-sm overflow-hidden">
-        {/* Grid overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(51,65,85,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(51,65,85,0.12) 1px, transparent 1px)",
-            backgroundSize: "40px 40px",
-          }}
-        />
-
-        <svg
-          ref={mapRef}
-          className="w-full h-full"
-          viewBox="0 0 1000 520"
-          onMouseMove={handleMouseMove}
-        >
-          {/* Grid lines */}
-          {[130, 260, 390].map((y) => (
-            <line key={`h${y}`} x1="0" y1={y} x2="1000" y2={y} stroke="rgba(51,65,85,0.08)" strokeWidth="0.5" strokeDasharray="4,4" />
-          ))}
-          {[250, 500, 750].map((x) => (
-            <line key={`v${x}`} x1={x} y1="0" x2={x} y2="520" stroke="rgba(51,65,85,0.08)" strokeWidth="0.5" strokeDasharray="4,4" />
-          ))}
-
-          {/* Landmasses */}
-          {landmasses.map((land) => (
-            <path
-              key={land.id}
-              data-region={land.id}
-              className={`fill-tertiary stroke-border-dim stroke-[0.5] transition-all hover:fill-hover cursor-pointer ${land.crisis}`}
-              d={land.d}
-              onMouseEnter={(e) => handleRegionEnter(land.id, e)}
-              onMouseMove={handleRegionMove}
-              onMouseLeave={handleRegionLeave}
-            />
-          ))}
-
-          {/* Markers */}
-          {markers.map((m, i) => (
-            <g key={i}>
-              {m.ping && <circle cx={m.cx} cy={m.cy} r="2" fill={m.color} className="animate-nato-ping" />}
-              <circle cx={m.cx} cy={m.cy} r="3" fill={m.color} />
-              <text x={m.cx} y={m.cy - 7} textAnchor="middle" fill="#64748b" fontSize="8" fontFamily="JetBrains Mono" fontWeight="600">
-                {m.label}
-              </text>
-            </g>
-          ))}
-        </svg>
-
-        {/* Legend */}
-        <div className="absolute top-2.5 right-2.5 bg-[rgba(4,6,10,0.97)] border border-border-dim rounded-sm p-3 z-10 min-w-[160px]">
-          <div className="font-mono text-[9px] font-bold text-text-muted uppercase tracking-[1.5px] mb-2.5 pb-1.5 border-b border-border-dim">Legend</div>
-          {[
-            { color: "#dc2626", glow: true, label: "Critical (CAT-1)" },
-            { color: "#f59e0b", glow: false, label: "Elevated (CAT-2)" },
-            { color: "#06b6d4", glow: false, label: "Normal (CAT-3)" },
-            { color: "#475569", glow: false, label: "Stable" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-2 text-[11px] text-text-secondary mb-1.5">
-              <span className="w-2 h-2 rounded-full" style={{ background: item.color, boxShadow: item.glow ? `0 0 6px ${item.color}` : "none" }} />
-              {item.label}
-            </div>
+    <div className="space-y-4 p-4">
+      <NatoPanel
+        title="Common Operating Picture"
+        subtitle="Global Crisis Heatmap — Interactive"
+        headerAction={
+          <div className="flex items-center gap-2">
+            <Filter className="h-3 w-3 text-slate-500" />
+            <span className="text-[10px] font-mono text-slate-500">
+              {filteredEvents.length} INCIDENTS
+            </span>
+          </div>
+        }
+      >
+        {/* Filter Chips */}
+        <div className="mb-4 flex flex-wrap gap-1.5">
+          {categoryFilters.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveFilter(cat)}
+              className={cn(
+                "rounded-md px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider transition-all",
+                activeFilter === cat
+                  ? "bg-cyan/10 text-cyan border border-cyan/30"
+                  : "bg-surface-elevated text-slate-500 border border-border hover:border-slate-600"
+              )}
+            >
+              {cat}
+            </button>
           ))}
         </div>
 
-        {/* Coords */}
-        <div className="absolute bottom-2.5 left-2.5 font-mono text-[10px] text-text-muted bg-[rgba(4,6,10,0.95)] px-2.5 py-1 rounded-sm border border-border-dim z-10 tracking-wide">
-          {coords}
-        </div>
-
-        {/* Tooltip */}
-        {tooltip && (
-          <div
-            className="absolute bg-panel border border-border-med rounded-sm p-3.5 z-[100] shadow-lg min-w-[220px] pointer-events-none"
-            style={{
-              left: tooltipPos.x - (mapRef.current?.getBoundingClientRect().left || 0) + 16,
-              top: tooltipPos.y - (mapRef.current?.getBoundingClientRect().top || 0) + 16,
-            }}
+        {/* SVG World Map */}
+        <div className="relative aspect-[2/1] w-full overflow-hidden rounded-lg border border-border bg-abyss">
+          <svg
+            viewBox="0 0 1000 500"
+            className="h-full w-full"
+            preserveAspectRatio="xMidYMid slice"
           >
-            <div className="font-mono text-[9px] font-bold text-text-muted uppercase tracking-[1.5px] mb-1.5">Area of Responsibility</div>
-            <div className="text-[13px] font-bold mb-1 tracking-tight">{tooltip.name}</div>
-            <div className="font-mono text-[10px] text-cyan mb-2 tracking-wide">
-              {tooltip.lat} {tooltip.lon}
-            </div>
-            <div className="text-[11px] text-text-secondary leading-relaxed">
-              Active crises: {tooltip.crises} | Intel reports: {tooltip.crises * 12}
-            </div>
-            <div className={`inline-block mt-2 px-2.5 py-[3px] rounded-[3px] font-mono text-[10px] font-bold uppercase tracking-wide ${tooltip.sevClass}`}>
-              {tooltip.sev}
+            {/* Grid lines */}
+            {Array.from({ length: 19 }, (_, i) => (
+              <line
+                key={`v${i}`}
+                x1={i * 55.5}
+                y1={0}
+                x2={i * 55.5}
+                y2={500}
+                stroke="#1e2129"
+                strokeWidth="0.5"
+              />
+            ))}
+            {Array.from({ length: 9 }, (_, i) => (
+              <line
+                key={`h${i}`}
+                x1={0}
+                y1={i * 55.5}
+                x2={1000}
+                y2={i * 55.5}
+                stroke="#1e2129"
+                strokeWidth="0.5"
+              />
+            ))}
+
+            {/* Simplified continent shapes */}
+            <path
+              d="M150,80 Q200,60 280,70 Q320,90 300,150 Q280,200 220,220 Q150,200 120,150 Q100,100 150,80Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+            <path
+              d="M220,240 Q280,230 320,250 Q340,300 300,380 Q260,420 240,380 Q220,320 220,240Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+            <path
+              d="M420,60 Q480,50 520,70 Q560,100 540,140 Q500,160 460,150 Q420,130 420,60Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+            <path
+              d="M440,160 Q500,150 540,170 Q580,220 560,300 Q520,350 480,340 Q440,300 440,220Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+            <path
+              d="M560,50 Q640,40 720,60 Q800,80 840,120 Q860,180 820,220 Q760,240 680,220 Q600,180 560,120Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+            <path
+              d="M720,300 Q780,290 820,310 Q840,350 800,380 Q760,390 720,370Z"
+              fill="#1a1d27"
+              stroke="#2a2e3b"
+              strokeWidth="1"
+            />
+
+            {/* Crisis markers */}
+            {filteredEvents.map((event) => {
+              const x = mapX(event.coordinates[1]);
+              const y = mapY(event.coordinates[0]);
+              const color = getThreatHex(event.threatLevel);
+              const isHovered = hoveredEvent === event.id;
+
+              return (
+                <g key={event.id}>
+                  {/* Pulse ring */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={isHovered ? 25 : 15}
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="0.5"
+                    opacity={0.3}
+                    className="animate-ping-slow"
+                  />
+                  {/* Center dot */}
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={isHovered ? 6 : 4}
+                    fill={color}
+                    className="cursor-pointer transition-all"
+                    onMouseEnter={() => setHoveredEvent(event.id)}
+                    onMouseLeave={() => setHoveredEvent(null)}
+                  />
+                  {/* Label on hover */}
+                  {isHovered && (
+                    <g>
+                      <rect
+                        x={x + 12}
+                        y={y - 30}
+                        width={200}
+                        height={50}
+                        rx="4"
+                        fill="#13151c"
+                        stroke={color}
+                        strokeWidth="0.5"
+                        opacity="0.95"
+                      />
+                      <text
+                        x={x + 18}
+                        y={y - 18}
+                        fill="#e2e8f0"
+                        fontSize="8"
+                        fontFamily="monospace"
+                        fontWeight="bold"
+                      >
+                        {event.id}
+                      </text>
+                      <text
+                        x={x + 18}
+                        y={y - 8}
+                        fill="#94a3b8"
+                        fontSize="7"
+                        fontFamily="monospace"
+                      >
+                        {event.title.slice(0, 35)}
+                        {event.title.length > 35 ? "..." : ""}
+                      </text>
+                      <text
+                        x={x + 18}
+                        y={y + 2}
+                        fill={color}
+                        fontSize="7"
+                        fontFamily="monospace"
+                      >
+                        {event.threatLevel} | {event.category} | CONF:{" "}
+                        {(event.confidence * 100).toFixed(0)}%
+                      </text>
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Overlay legend */}
+          <div className="absolute bottom-3 left-3 rounded-md border border-border bg-abyss/90 p-2 backdrop-blur">
+            <div className="space-y-1">
+              {[
+                { level: "FLASH", color: "#ef4444" },
+                { level: "CRITICAL", color: "#ef4444" },
+                { level: "HIGH", color: "#f97316" },
+                { level: "MODERATE", color: "#f59e0b" },
+                { level: "LOW", color: "#10b981" },
+              ].map((item) => (
+                <div key={item.level} className="flex items-center gap-2">
+                  <div
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="text-[9px] font-mono text-slate-500">
+                    {item.level}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
-        )}
+        </div>
+      </NatoPanel>
+
+      {/* Region Summary Cards */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {regionData.slice(0, 4).map((region) => (
+          <div
+            key={region.id}
+            className="rounded-lg border border-border bg-surface p-3 transition-all hover:border-cyan/20"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-mono text-slate-500">
+                {region.id}
+              </span>
+              <Badge
+                variant={region.threatLevel.toLowerCase() as any}
+                className="text-[9px]"
+              >
+                {region.threatLevel}
+              </Badge>
+            </div>
+            <p className="mt-1 text-xs font-medium text-slate-200">
+              {region.name}
+            </p>
+            <div className="mt-2 flex items-center gap-3">
+              <div className="flex items-center gap-1">
+                <MapPin className="h-3 w-3 text-slate-600" />
+                <span className="text-[10px] font-mono text-slate-500">
+                  {region.activeCrises} crises
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Eye className="h-3 w-3 text-slate-600" />
+                <span className="text-[10px] font-mono text-slate-500">
+                  {region.personnelDeployed.toLocaleString()} deployed
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </NatoPanel>
+    </div>
   );
 }

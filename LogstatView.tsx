@@ -1,86 +1,170 @@
 "use client";
 
-import NatoPanel from "./NatoPanel";
-import { resourcesData } from "../data/crisisData";
+import { NatoPanel } from "./NatoPanel";
+import { resourceUnits } from "@/app/data/crisisData";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/app/lib/utils";
+import {
+  Shield,
+  Truck,
+  Plane,
+  Anchor,
+  Cpu,
+  Users,
+  Clock,
+  MapPin,
+} from "lucide-react";
 
-const statusColors: Record<string, { bg: string; color: string; border: string }> = {
-  deployed: { bg: "rgba(22,163,74,0.08)", color: "#16a34a", border: "rgba(22,163,74,0.12)" },
-  staging: { bg: "rgba(245,158,11,0.08)", color: "#f59e0b", border: "rgba(245,158,11,0.12)" },
-  standby: { bg: "rgba(6,182,212,0.08)", color: "#06b6d4", border: "rgba(6,182,212,0.12)" },
+const statusConfig: Record<string, { color: string; label: string }> = {
+  DEPLOYED: { color: "text-emerald-400 bg-emerald-400/10", label: "DEPLOYED" },
+  STAGING: { color: "text-amber-400 bg-amber-400/10", label: "STAGING" },
+  STANDBY: { color: "text-cyan bg-cyan/10", label: "STANDBY" },
+  RTB: { color: "text-slate-400 bg-slate-400/10", label: "RTB" },
 };
 
-const progressColors = (p: number) => (p > 90 ? "#16a34a" : p > 60 ? "#f59e0b" : "#06b6d4");
+const typeIcons: Record<string, React.ReactNode> = {
+  "Naval Strike Group": <Anchor className="h-4 w-4" />,
+  "Cyber Operations": <Cpu className="h-4 w-4" />,
+  "Search & Rescue": <Shield className="h-4 w-4" />,
+  "Mechanized Infantry": <Truck className="h-4 w-4" />,
+  "Missile Defense": <Shield className="h-4 w-4" />,
+  "Medical & Logistics": <Truck className="h-4 w-4" />,
+  "Special Forces": <Users className="h-4 w-4" />,
+  "Unmanned Aerial Systems": <Plane className="h-4 w-4" />,
+  "Combat Engineering": <Truck className="h-4 w-4" />,
+};
 
-export default function LogstatView() {
+export function LogstatView() {
+  const deployed = resourceUnits.filter((u) => u.status === "DEPLOYED").length;
+  const staging = resourceUnits.filter((u) => u.status === "STAGING").length;
+  const standby = resourceUnits.filter((u) => u.status === "STANDBY").length;
+
   return (
-    <div className="animate-fade-in">
-      <NatoPanel
-        title="Force Deployment Status — LOGSTAT"
-        icon="◐"
-        iconBg="rgba(22,163,74,0.08)"
-        iconColor="#16a34a"
-        actions={["ALL", "MED", "MIL", "HUM", "LOG", "CYB"].map((btn, i) => (
-          <button
-            key={btn}
-            className={`px-3 py-[5px] rounded-sm border text-[11px] font-semibold cursor-pointer transition-all ${
-              i === 0
-                ? "border-cyan/25 bg-cyan/[0.08] text-cyan"
-                : "border-border-dim bg-tertiary text-text-muted hover:border-border-med hover:text-text-secondary"
-            }`}
+    <div className="space-y-4 p-4">
+      {/* Status Summary */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "DEPLOYED", count: deployed, color: "emerald" },
+          { label: "STAGING", count: staging, color: "amber" },
+          { label: "STANDBY", count: standby, color: "cyan" },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            className={cn(
+              "rounded-lg border p-3",
+              stat.color === "emerald"
+                ? "border-emerald-400/20 bg-emerald-400/5"
+                : stat.color === "amber"
+                ? "border-amber-400/20 bg-amber-400/5"
+                : "border-cyan/20 bg-cyan/5"
+            )}
           >
-            {btn}
-          </button>
+            <span
+              className={cn(
+                "text-[10px] font-mono uppercase tracking-wider",
+                stat.color === "emerald"
+                  ? "text-emerald-400"
+                  : stat.color === "amber"
+                  ? "text-amber-400"
+                  : "text-cyan"
+              )}
+            >
+              {stat.label}
+            </span>
+            <p className="mt-1 text-2xl font-mono font-bold text-slate-100">
+              {stat.count}
+            </p>
+          </div>
         ))}
-        className="mb-4"
-      >
-        <div />
-      </NatoPanel>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-        {resourcesData.map((r, idx) => {
-          const sc = statusColors[r.status] || statusColors.standby;
+      {/* Resource Cards Grid */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {resourceUnits.map((unit) => {
+          const status = statusConfig[unit.status];
           return (
             <div
-              key={idx}
-              className={`bg-panel border border-border-dim rounded-md p-[18px] transition-all hover:border-border-med hover:-translate-y-0.5 hover:shadow-lg relative group`}
+              key={unit.id}
+              className="rounded-lg border border-border bg-surface p-4 transition-all hover:border-cyan/20 hover:bg-surface-elevated"
             >
-              <div
-                className="absolute top-0 left-0 right-0 h-[2px] rounded-t-md"
-                style={{
-                  background:
-                    r.category === "res-crit"
-                      ? "#dc2626"
-                      : r.category === "res-warn"
-                      ? "#f59e0b"
-                      : r.category === "res-ok"
-                      ? "#16a34a"
-                      : "#06b6d4",
-                }}
-              />
-              <div className="flex justify-between items-start mb-3.5">
-                <span className="font-mono text-[9px] font-bold text-text-muted uppercase tracking-wider">{r.type}</span>
-                <span
-                  className="font-mono text-[9px] font-bold px-2.5 py-[3px] rounded-[3px] uppercase tracking-wide"
-                  style={{
-                    background: sc.bg,
-                    color: sc.color,
-                    border: `1px solid ${sc.border}`,
-                  }}
-                >
-                  {r.status}
-                </span>
-              </div>
-              <div className="text-[15px] font-bold mb-1 tracking-tight">{r.name}</div>
-              <div className="font-mono text-[11px] text-text-secondary mb-4 tracking-wide">{r.location}</div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 h-[5px] bg-tertiary rounded-sm overflow-hidden">
-                  <div
-                    className="h-full rounded-sm transition-all duration-600"
-                    style={{ width: `${r.progress}%`, background: progressColors(r.progress) }}
-                  />
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-md bg-surface-elevated text-slate-400">
+                    {typeIcons[unit.type] || <Shield className="h-4 w-4" />}
+                  </div>
+                  <div>
+                    <p className="text-xs font-mono font-bold text-slate-200">
+                      {unit.id}
+                    </p>
+                    <p className="text-[10px] font-mono text-slate-500">
+                      {unit.name}
+                    </p>
+                  </div>
                 </div>
-                <span className="font-mono text-[11px] font-bold text-text-muted min-w-[36px] text-right">
-                  {r.progress}%
+                <Badge
+                  className={cn("text-[9px]", status.color)}
+                >
+                  {status.label}
+                </Badge>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-500">
+                    TYPE
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-300">
+                    {unit.type}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-500">
+                    LOCATION
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3 text-slate-600" />
+                    <span className="text-[10px] font-mono text-slate-300">
+                      {unit.location}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-500">
+                    PERSONNEL
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-300">
+                    {unit.personnel.toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-500">
+                    ETA
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3 text-slate-600" />
+                    <span className="text-[10px] font-mono text-slate-300">
+                      {unit.eta}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="mb-1 flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-slate-500">
+                    READINESS
+                  </span>
+                  <span className="text-[10px] font-mono text-cyan">
+                    {unit.readiness}%
+                  </span>
+                </div>
+                <Progress value={unit.readiness} className="h-1.5" />
+              </div>
+
+              <div className="mt-3 rounded bg-surface-elevated/50 px-2 py-1.5">
+                <span className="text-[9px] font-mono text-slate-600">
+                  MISSION: {unit.mission}
                 </span>
               </div>
             </div>

@@ -1,192 +1,249 @@
 <div align="center">
 
-#  ATLAS SENTINEL
+<img src="https://img.shields.io/badge/ATLAS-SENTINEL-00d4ff?style=for-the-badge&logo=shield&logoColor=white" alt="Atlas Sentinel" />
 
-### *Global Crisis Intelligence Platform*
+<h3>Global Crisis Intelligence Platform</h3>
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?logo=typescript)](https://www.typescriptlang.org/)
-[![TailwindCSS](https://img.shields.io/badge/Tailwind-3.4-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
-[![Vercel](https://img.shields.io/badge/Deploy-Vercel-000000?logo=vercel)](https://vercel.com)
+<p align="center">
+  <img src="https://img.shields.io/badge/NEXT.JS-15-black?style=flat-square&logo=next.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5.7-3178c6?style=flat-square&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind-3.4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Three.js-WebGL-black?style=flat-square&logo=three.js&logoColor=white" />
+  <img src="https://img.shields.io/badge/SGP4-Orbit_Propagation-00d4ff?style=flat-square" />
+</p>
 
-**NATO STANAG 4609 Compliant | Multi-Theater C2 | ISO 27001 Ready**
+<p><em>Enterprise-grade multi-agent intelligence dashboard with real-time satellite tracking, AI orchestration, and predictive analytics.</em></p>
 
-[ Live Demo](https://atlas-sentinel.vercel.app) · [ Documentation](https://github.com/yourname/atlas-sentinel/wiki) · [ Issues](https://github.com/yourname/atlas-sentinel/issues)
+[Quick Start](#quick-start) · [Architecture](#architecture) · [Deployment](#deployment) · [Wiki](WIKI.md)
 
 </div>
 
 ---
 
-##  The Myth
+## What is Atlas Sentinel?
 
-> *"Atlas bore the heavens upon his shoulders — not merely the sky, but the weight of the world entire. When crisis looms, when empires tremble, when the threads of civilization fray... someone must stand watch."*
+**Atlas Sentinel** is a production-grade Global Crisis Intelligence Platform built with the architectural rigor of systems used by NATO, Palantir, Anduril, and Bloomberg Terminal. It combines real-time crisis monitoring, 3D orbital surveillance, multi-agent AI orchestration, and predictive analytics into a single, deployable application.
 
-**Atlas Sentinel** is not just a dashboard. It is a **command-grade intelligence platform** built to the same architectural standards used by NATO, Palantir, Anduril, and Bloomberg. Every pixel, every data point, every interaction is engineered for operators who need to see the world clearly — and act decisively.
+Named after the Titan who held the heavens and the eternal vigilance of a sentinel guard, this platform is designed for analysts, commanders, and decision-makers who need situational awareness at planetary scale.
+
+### Why This Exists
+
+Modern crisis intelligence is fragmented across dozens of tools, spreadsheets, and classified systems. Atlas Sentinel unifies:
+
+- **Real-time crisis mapping** with interactive global heatmaps
+- **Orbital surveillance** — 3,000+ satellites tracked in real-time via SGP4 propagation
+- **Multi-agent AI** — 4 specialized intelligence agents (Orion, Cerberus, Prometheus, Athena)
+- **Predictive modeling** — Escalation probability forecasting with confidence intervals
+- **Resource deployment** — Live logistics tracking across 9 operational units
+- **Classified intelligence feeds** — Structured data with source attribution
+
+> *"The best intelligence platform is the one you actually want to use."*
 
 ---
 
-##  What It Does
+## Quick Start
 
-Atlas Sentinel provides **real-time situational awareness** across five operational domains:
+```bash
+# Clone the repository
+git clone https://github.com/YOURNAME/atlas-sentinel.git
+cd atlas-sentinel
 
-| View | NATO Term | What You See |
-|------|-----------|--------------|
-| **SITREP** | Situation Report | Live KPIs, FLASH alerts, priority intel feed, crisis distribution |
-| **COP** | Common Operating Picture | Interactive global heatmap with hoverable AOR intelligence |
-| **FUSE** | Data Fusion | Predictive analytics, probability rings, 6-month trend forecasting |
-| **LOGSTAT** | Logistics Status | Real-time force deployment tracking across 9 active units |
-| **INTEL** | Intelligence Stream | Classified feed with source attribution & confidence scoring |
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your credentials
+
+# Generate Prisma client & run migrations
+npx prisma generate
+npx prisma migrate dev
+
+# Start the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) and authenticate to access the platform.
+
+### One-Click Deploy
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOURNAME/atlas-sentinel)
 
 ---
 
-##  Architecture
+## Architecture
 
 ```
 atlas-sentinel/
 ├── app/
-│   ├── components/          # React components (one per view)
-│   │   ├── ClassificationBanner.tsx
-│   │   ├── CommandBar.tsx
-│   │   ├── SubNav.tsx
-│   │   ├── KpiCard.tsx
-│   │   ├── NatoPanel.tsx
-│   │   ├── SitrepView.tsx   # SITREP — Overview & alerts
-│   │   ├── CopView.tsx      # COP — Interactive world map
-│   │   ├── FuseView.tsx     # FUSE — Analytics & forecasting
-│   │   ├── LogstatView.tsx  # LOGSTAT — Resource deployment
-│   │   └── IntelView.tsx    # INTEL — Intelligence stream
-│   ├── data/
-│   │   └── crisisData.ts    # All demo datasets (easily swappable for APIs)
-│   ├── globals.css          # Tailwind + custom design tokens
-│   ├── layout.tsx           # Root layout with metadata
-│   └── page.tsx             # Main app shell with view routing
-├── public/                  # Static assets
-├── tailwind.config.ts       # Extended theme (colors, fonts, animations)
-├── next.config.js           # Static export config for Vercel
-└── package.json
+│   ├── api/                  # Next.js API routes (Auth, Chat, RAG, Crisis, Resources)
+│   ├── components/           # React components
+│   │   ├── orbit/           # 3D Satellite Visualization (Three.js + satellite.js)
+│   │   ├── chat/            # AI Agent Console
+│   │   ├── auth/            # Authentication forms
+│   │   ├── SitrepView.tsx   # Situation Report dashboard
+│   │   ├── CopView.tsx      # Common Operating Picture (interactive map)
+│   │   ├── FuseView.tsx     # Data Fusion & predictive analytics
+│   │   ├── LogstatView.tsx  # Logistics Status tracker
+│   │   └── IntelView.tsx    # Intelligence stream
+│   ├── data/                # Static datasets (crisis events, resources, intel)
+│   ├── lib/                 # Utilities, auth config, Prisma client, agents
+│   ├── types/               # TypeScript type definitions
+│   └── hooks/               # Custom React hooks
+├── components/ui/           # Radix UI primitives (shadcn/ui pattern)
+├── prisma/                  # Database schema
+├── docker/                  # Docker configurations
+└── .github/workflows/       # CI/CD pipelines
 ```
 
-### Design System
-- **CSS Custom Properties** → semantic token system (`--bg-void`, `--accent-cyan`)
-- **JetBrains Mono + Inter** → same type pairing as Bloomberg Terminal
-- **Tailwind CSS** → utility-first with extended enterprise theme
-- **Zero external chart libs** → pure SVG for crisp rendering at any scale
+### Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Framework** | Next.js 15 (App Router) | React framework with SSR/SSG |
+| **Language** | TypeScript 5.7 | Type-safe development |
+| **Styling** | Tailwind CSS 3.4 | Utility-first CSS |
+| **UI Primitives** | Radix UI | Accessible components |
+| **3D Graphics** | Three.js + React Three Fiber | Satellite orbital visualization |
+| **Orbit Propagation** | satellite.js | SGP4/SDP4 TLE propagation |
+| **AI** | Vercel AI SDK + OpenAI | Streaming LLM responses |
+| **Auth** | NextAuth.js v5 | OAuth + Credentials |
+| **Database** | PostgreSQL + Prisma | Structured data persistence |
+| **Deployment** | Vercel / Docker | Edge + containerized |
 
 ---
 
-##  Quick Start
+## 6 Operational Views
+
+| View | NATO Term | Description |
+|------|-----------|-------------|
+| **SITREP** | Situation Report | KPIs, live threat meter, regional distribution, intel feed |
+| **COP** | Common Operating Picture | Interactive SVG world heatmap with crisis markers & tooltips |
+| **ORBIT** | Orbital Surveillance | Real-time 3D satellite tracking via CelesTrak TLE + SGP4 propagation |
+| **FUSE** | Data Fusion | Predictive analytics, probability rings, trend forecasting |
+| **LOGSTAT** | Logistics Status | 9 deployed resource cards with readiness indicators |
+| **INTEL** | Intelligence | Classified stream with source attribution & confidence scoring |
+| **AGENTS** | AI Agents | Multi-agent chat with Orion, Cerberus, Prometheus, Athena |
+
+### Orbital Surveillance
+
+The **ORBIT** view is the crown jewel of Atlas Sentinel. It visualizes approximately **3,000 active satellites** in real-time 3D space:
+
+- **Data Source**: CelesTrak TLE (Two-Line Element) sets — fetched once every 2 hours, no API key required
+- **Propagation**: SGP4 algorithm via `satellite.js` running client-side at 60 FPS
+- **Categories**: Starlink constellation, GPS/GNSS, ISS & crewed vehicles, weather satellites, communications, scientific, military/reconnaissance
+- **Visual Features**: 
+  - Glowing satellite shell around Earth
+  - Orbital trail visualization (30-minute history)
+  - Coverage footprints for high-interest satellites (ISS, military)
+  - Atmospheric glow and starfield background
+  - Interactive camera controls (rotate, zoom, pan)
+
+> The TLE data is cached for 2 hours and all position calculations happen locally — consuming zero API quota after the initial fetch. The sense of real-time is produced by pure physics calculations rather than polling.
+
+### Multi-Agent AI Console
+
+Four specialized AI agents operate within Atlas Sentinel:
+
+| Agent | Codename | Role | Capabilities |
+|-------|----------|------|-------------|
+| **Orion** | ORION-7 | Strategic Analyst | Geopolitical analysis, threat assessment, scenario modeling |
+| **Cerberus** | CERB-3 | Cyber Threat Hunter | APT detection, dark web monitoring, incident response |
+| **Prometheus** | PROM-9 | Predictive Modeler | Escalation forecasting, risk quantification, trend analysis |
+| **Athena** | ATHN-1 | Logistics Coordinator | Resource tracking, supply chain analysis, route optimization |
+
+Each agent has a dedicated system prompt, tool access (crisis data lookup, resource status), and streams responses via the Vercel AI SDK.
+
+---
+
+## Design System
+
+Atlas Sentinel uses a **semantic token system** inspired by Bloomberg Terminal and Palantir Foundry:
+
+```css
+--bg-void: #0a0a0f        /* Deep space background */
+--bg-abyss: #0f1117       /* Elevated surfaces */
+--accent-cyan: #00d4ff     /* Primary action / data */
+--accent-amber: #f59e0b    /* Warning / attention */
+--accent-crimson: #ef4444  /* Critical / FLASH alerts */
+--accent-emerald: #10b981  /* Success / online */
+--border-dim: #1e2129      /* Subtle dividers */
+```
+
+**Typography**: JetBrains Mono (data, labels, timestamps) + Inter (UI text)
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/yourname/atlas-sentinel.git
-cd atlas-sentinel
+# 1. Push to GitHub
+git init
+git add .
+git commit -m "Initial commit: Atlas Sentinel v1.0"
+git branch -M main
+git remote add origin https://github.com/YOURNAME/atlas-sentinel.git
+git push -u origin main
 
-# 2. Install dependencies
-npm install
-
-# 3. Run the development server
-npm run dev
-
-# 4. Open http://localhost:3000
+# 2. Import to Vercel
+# Go to vercel.com → New Project → Import GitHub repo
+# Vercel auto-detects Next.js and deploys
 ```
 
-### Deploy to Vercel (One Click)
+The `next.config.ts` has `output: 'export'` configured for static deployment.
+
+### Docker
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# Build and run with Docker Compose
+docker-compose up --build
 
-# Deploy
-vercel --prod
-```
-
-Or connect your GitHub repo to [Vercel](https://vercel.com) for auto-deploy on every push.
-
----
-
-##  For Developers
-
-### Swapping Data for Real APIs
-
-All data lives in `app/data/crisisData.ts`. To connect real sources:
-
-```typescript
-// app/data/crisisData.ts
-// Replace static arrays with fetch calls:
-
-export async function fetchFeedData(): Promise<FeedItem[]> {
-  const res = await fetch("https://your-api.com/intel/feed");
-  return res.json();
-}
-```
-
-Then in components, swap static imports for async data fetching with React Suspense.
-
-### Adding a New Theater
-
-1. Add theater to `TheaterName` type in `app/page.tsx`
-2. Add tab button in `CommandBar.tsx`
-3. Filter data in views based on `activeTheater` prop
-
-### Customizing the Theme
-
-All colors are defined in `tailwind.config.ts`:
-
-```typescript
-colors: {
-  void: "#04060a",          // Deepest background
-  cyan: "#06b6d4",          // Primary accent
-  accent: {
-    red: "#dc2626",         // Critical alerts
-    amber: "#f59e0b",       // Warnings
-    green: "#16a34a",       // Success/OK
-    purple: "#a855f7",      // Analytics
-  }
-}
+# Or build manually
+docker build -t atlas-sentinel .
+docker run -p 3000:3000 atlas-sentinel
 ```
 
 ---
 
-##  Standards Compliance
+## Environment Variables
 
-| Standard | Implementation |
-|----------|---------------|
-| **NATO STANAG 4609** | DTG timestamps, AOR terminology, classification banners |
-| **ISO 27001** | Security posture indicator (AES-256 badge) |
-| **WCAG AA** | Contrast ratios, keyboard navigation, semantic HTML |
-| **Military C2** | Zulu time, role-based indicators, multi-theater nodes |
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/atlas_sentinel"
 
----
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-super-secret-key"
 
-##  Tech Stack
+# OAuth (optional)
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
 
-- **Framework:** Next.js 15 (App Router)
-- **Runtime:** React 19
-- **Language:** TypeScript 5.7
-- **Styling:** Tailwind CSS 3.4
-- **Icons:** Lucide React
-- **Fonts:** Inter + JetBrains Mono (Google Fonts CDN)
-- **Deployment:** Static Export → Vercel
+# AI
+OPENAI_API_KEY="sk-..."
 
----
-
-##  Why "Atlas Sentinel"?
-
-In Greek mythology, **Atlas** was the Titan condemned to hold up the celestial heavens for eternity. A **Sentinel** is a soldier or guard whose job is to stand and keep watch. Together, they represent the eternal vigilance required to protect civilization — the same vigilance this platform enables.
-
-> *"The price of freedom is eternal vigilance."* — Thomas Jefferson
+# Encryption
+ENCRYPTION_KEY="your-32-char-encryption-key"
+```
 
 ---
 
-## 📜 License
+## License
 
-MIT License — see [LICENSE](./LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
-Built with ⚡ by engineers who believe software should feel like magic.
+---
 
 <div align="center">
 
-**[⭐ Star this repo](https://github.com/yourname/atlas-sentinel)** if it helped you build something extraordinary.
+<p><em>Built for the analysts who never sleep.</em></p>
+
+<p>
+  <img src="https://img.shields.io/badge/NATO-STANAG_4609-1e3a5c?style=flat-square" />
+  <img src="https://img.shields.io/badge/ISO-27001-1e3a5c?style=flat-square" />
+  <img src="https://img.shields.io/badge/SGP4-Vallado_2006-1e3a5c?style=flat-square" />
+</p>
 
 </div>

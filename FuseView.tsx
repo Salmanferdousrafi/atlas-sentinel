@@ -1,207 +1,202 @@
 "use client";
 
-import KpiCard from "./KpiCard";
-import NatoPanel from "./NatoPanel";
-import { trendMonths, trendValues } from "../data/crisisData";
+import { NatoPanel } from "./NatoPanel";
+import { predictionMetrics } from "@/app/data/crisisData";
+import { cn } from "@/app/lib/utils";
+import { TrendingUp, AlertCircle, BrainCircuit } from "lucide-react";
 
-function RingMetric({ value, label, color, subtext }: { value: number; label: string; color: string; subtext: string }) {
-  const circumference = 2 * Math.PI * 60;
-  const offset = circumference - (value / 100) * circumference;
-
+export function FuseView() {
   return (
-    <div className="flex flex-col items-center gap-[18px] py-7">
-      <div className="relative w-[140px] h-[140px]">
-        <svg width="140" height="140" viewBox="0 0 140 140" className="-rotate-90">
-          <circle cx="70" cy="70" r="60" fill="none" stroke="#111827" strokeWidth="10" />
-          <circle
-            cx="70"
-            cy="70"
-            r="60"
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)" }}
-          />
-        </svg>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
-          <div className="font-mono text-[28px] font-bold" style={{ color }}>
-            {value}%
+    <div className="space-y-4 p-4">
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Probability Rings */}
+        <NatoPanel
+          title="Escalation Probability"
+          subtitle="FUSE Predictive Model — 72H Window"
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            {predictionMetrics.map((metric) => {
+              const circumference = 2 * Math.PI * 36;
+              const strokeDashoffset =
+                circumference - metric.probability * circumference;
+
+              return (
+                <div
+                  key={metric.label}
+                  className="flex flex-col items-center rounded-lg border border-border bg-surface-elevated/30 p-4"
+                >
+                  <div className="relative h-24 w-24">
+                    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="36"
+                        fill="none"
+                        stroke="#1e2129"
+                        strokeWidth="6"
+                      />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="36"
+                        fill="none"
+                        stroke={
+                          metric.probability > 0.7
+                            ? "#ef4444"
+                            : metric.probability > 0.5
+                            ? "#f59e0b"
+                            : "#10b981"
+                        }
+                        strokeWidth="6"
+                        strokeLinecap="round"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        className="transition-all duration-1000"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-lg font-mono font-bold text-slate-100">
+                        {(metric.probability * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-center text-xs font-medium text-slate-300">
+                    {metric.label}
+                  </p>
+                  <span className="text-[10px] font-mono text-slate-600">
+                    {metric.timeframe} forecast
+                  </span>
+
+                  {/* Sparkline */}
+                  <svg
+                    viewBox="0 0 100 30"
+                    className="mt-3 h-8 w-full"
+                    preserveAspectRatio="none"
+                  >
+                    <defs>
+                      <linearGradient
+                        id={`spark-${metric.label.replace(/\s/g, "")}`}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stopColor="#00d4ff" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="#00d4ff" stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d={`M0,${30 - metric.trend[0] * 30} ${metric.trend
+                        .map(
+                          (v, i) =>
+                            `L${(i / (metric.trend.length - 1)) * 100},${
+                              30 - v * 30
+                            }`
+                        )
+                        .join(" ")} L100,30 L0,30Z`}
+                      fill={`url(#spark-${metric.label.replace(/\s/g, "")})`}
+                    />
+                    <path
+                      d={`M0,${30 - metric.trend[0] * 30} ${metric.trend
+                        .map(
+                          (v, i) =>
+                            `L${(i / (metric.trend.length - 1)) * 100},${
+                              30 - v * 30
+                            }`
+                        )
+                        .join(" ")}`}
+                      fill="none"
+                      stroke="#00d4ff"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
+              );
+            })}
           </div>
-          <div className="font-mono text-[9px] text-text-muted uppercase tracking-[1.5px]">{label}</div>
-        </div>
-      </div>
-      <div className="font-mono text-[10px] text-text-muted text-center leading-relaxed whitespace-pre-line">
-        {subtext}
-      </div>
-    </div>
-  );
-}
-
-function TrendChart() {
-  const maxVal = Math.max(...trendValues);
-  const points = trendValues
-    .map((v, i) => {
-      const x = (i / (trendValues.length - 1)) * 100;
-      const y = 100 - (v / maxVal) * 75 - 12;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <div className="relative h-[260px]">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
-        <defs>
-          <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgba(6,182,212,0.22)" />
-            <stop offset="100%" stopColor="rgba(6,182,212,0)" />
-          </linearGradient>
-        </defs>
-        <polygon points={`0,100 ${points} 100,100`} fill="url(#trendGrad)" />
-        <polyline points={points} fill="none" stroke="#06b6d4" strokeWidth="0.6" strokeLinecap="round" strokeLinejoin="round" />
-        {trendValues.map((v, i) => {
-          const x = (i / (trendValues.length - 1)) * 100;
-          const y = 100 - (v / maxVal) * 75 - 12;
-          return (
-            <circle
-              key={i}
-              cx={x}
-              cy={y}
-              r="1.2"
-              fill="#06b6d4"
-              style={{ filter: "drop-shadow(0 0 3px rgba(6,182,212,0.5))" }}
-            />
-          );
-        })}
-      </svg>
-      <div className="flex justify-between mt-2.5 px-1.5">
-        {trendMonths.map((m) => (
-          <span key={m} className="font-mono text-[10px] text-text-muted font-semibold">
-            {m}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export default function FuseView() {
-  return (
-    <div className="animate-fade-in">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-[18px]">
-        <KpiCard
-          label="Pred. Accuracy"
-          value="96.1%"
-          badge="NOM"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-cyan"
-          delta="▼ 0.2% (30D)"
-          deltaClass="text-accent-green"
-        />
-        <KpiCard
-          label="Response Time"
-          value="3.8h"
-          badge="OPT"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-accent-green"
-          delta="▼ 22% faster"
-          deltaClass="text-accent-green"
-          variant="success"
-        />
-        <KpiCard
-          label="Escalation Risk"
-          value="31"
-          badge="HIGH"
-          badgeClass="bg-accent-amber/10 text-accent-amber border border-accent-amber/15"
-          valueClass="text-accent-amber"
-          delta="▲ 8 new alerts"
-          deltaClass="text-accent-red"
-          variant="warning"
-        />
-        <KpiCard
-          label="Flash Alerts (24H)"
-          value="187"
-          badge="CRIT"
-          badgeClass="bg-accent-red/10 text-accent-red border border-accent-red/15"
-          valueClass="text-accent-red"
-          delta="▲ 53 vs yesterday"
-          deltaClass="text-accent-red"
-          variant="critical"
-        />
-        <KpiCard
-          label="Sensor Uptime"
-          value="99.97%"
-          badge="NOM"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-cyan"
-          delta="— 0.00%"
-          deltaClass="text-text-muted"
-        />
-        <KpiCard
-          label="Data Fusion"
-          value="14 sources"
-          badge="NOM"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-cyan"
-          delta="▲ 2 new"
-          deltaClass="text-accent-red"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <NatoPanel
-          title="Conflict Probability (EUCOM)"
-          icon="◉"
-          iconBg="rgba(220,38,38,0.08)"
-          iconColor="#dc2626"
-        >
-          <RingMetric value={80} label="High Risk" color="#dc2626" subtext={"EUCOM AOR
-Window: T+30D
-Confidence: 94%"} />
         </NatoPanel>
+
+        {/* Trend Analysis */}
         <NatoPanel
-          title="Natural Disaster Risk"
-          icon="◉"
-          iconBg="rgba(245,158,11,0.08)"
-          iconColor="#f59e0b"
+          title="Trend Analysis"
+          subtitle="Multi-factor Correlation Matrix"
         >
-          <RingMetric value={60} label="Moderate" color="#f59e0b" subtext={"Pacific Ring of Fire
-Window: T+14D
-Confidence: 91%"} />
-        </NatoPanel>
-        <NatoPanel
-          title="Cyber Threat Index"
-          icon="◉"
-          iconBg="rgba(6,182,212,0.08)"
-          iconColor="#06b6d4"
-        >
-          <RingMetric value={50} label="Elevated" color="#06b6d4" subtext={"Global Infrastructure
-Status: Ongoing
-Confidence: 88%"} />
+          <div className="space-y-4">
+            {predictionMetrics.map((metric) => (
+              <div key={metric.label} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-300">{metric.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {(metric.probability * 100).toFixed(0)}%
+                    </span>
+                    {metric.probability > 0.6 && (
+                      <AlertCircle className="h-3 w-3 text-amber-400" />
+                    )}
+                  </div>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-surface-elevated">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all duration-1000",
+                      metric.probability > 0.7
+                        ? "bg-crimson"
+                        : metric.probability > 0.5
+                        ? "bg-amber-400"
+                        : "bg-emerald-400"
+                    )}
+                    style={{ width: `${metric.probability * 100}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[9px] font-mono text-slate-600">
+                  <span>0%</span>
+                  <span>25%</span>
+                  <span>50%</span>
+                  <span>75%</span>
+                  <span>100%</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </NatoPanel>
       </div>
 
+      {/* Model Confidence */}
       <NatoPanel
-        title="Crisis Event Trend — 6 Month Forecast"
-        icon="◈"
-        iconBg="rgba(139,92,246,0.08)"
-        iconColor="#a855f7"
-        actions={["6M", "1Y", "3Y"].map((btn, i) => (
-          <button
-            key={btn}
-            className={`px-3 py-[5px] rounded-sm border text-[11px] font-semibold cursor-pointer transition-all ${
-              i === 0
-                ? "border-cyan/25 bg-cyan/[0.08] text-cyan"
-                : "border-border-dim bg-tertiary text-text-muted hover:border-border-med hover:text-text-secondary"
-            }`}
-          >
-            {btn}
-          </button>
-        ))}
+        title="Model Performance"
+        subtitle="FUSE Engine — Last 30 Days"
       >
-        <TrendChart />
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            { label: "Prediction Accuracy", value: "91.4%", delta: "+2.1%", icon: BrainCircuit },
+            { label: "False Positive Rate", value: "4.2%", delta: "-0.8%", icon: TrendingUp },
+            { label: "Mean Latency", value: "142ms", delta: "-12ms", icon: TrendingUp },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="flex items-center gap-3 rounded-lg border border-border bg-surface-elevated/30 p-4"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan/10">
+                <stat.icon className="h-5 w-5 text-cyan" />
+              </div>
+              <div>
+                <p className="text-[10px] font-mono text-slate-500">
+                  {stat.label}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-mono font-bold text-slate-100">
+                    {stat.value}
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400">
+                    {stat.delta}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </NatoPanel>
     </div>
   );

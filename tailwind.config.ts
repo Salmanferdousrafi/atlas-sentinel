@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: ["class"],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,74 +10,91 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        void: "#04060a",
-        primary: "#080b14",
-        secondary: "#0d111c",
-        tertiary: "#111827",
-        panel: "#0f172a",
-        hover: "#1e293b",
-        elevated: "#1a2236",
-        "border-dim": "#1e293b",
-        "border-med": "#334155",
-        "border-bright": "#475569",
-        "text-primary": "#f8fafc",
-        "text-secondary": "#94a3b8",
-        "text-muted": "#475569",
-        "text-dim": "#334155",
-        cyan: "#06b6d4",
-        accent: {
-          blue: "#3b82f6",
-          indigo: "#6366f1",
-          amber: "#f59e0b",
-          red: "#dc2626",
-          crimson: "#991b1b",
-          green: "#16a34a",
-          teal: "#14b8a6",
-          purple: "#a855f7",
+        void: "#0a0a0f",
+        abyss: "#0f1117",
+        surface: "#13151c",
+        "surface-elevated": "#1a1d27",
+        "surface-hover": "#222633",
+        border: "#2a2e3b",
+        "border-dim": "#1e2129",
+        cyan: {
+          DEFAULT: "#00d4ff",
+          glow: "#00d4ff40",
+          dim: "#00d4ff20",
         },
-        classification: "#fbbf24",
+        amber: {
+          DEFAULT: "#f59e0b",
+          glow: "#f59e0b40",
+        },
+        crimson: {
+          DEFAULT: "#ef4444",
+          glow: "#ef444440",
+        },
+        emerald: {
+          DEFAULT: "#10b981",
+          glow: "#10b98140",
+        },
+        violet: {
+          DEFAULT: "#8b5cf6",
+          glow: "#8b5cf640",
+        },
+        slate: {
+          50: "#f8fafc",
+          100: "#f1f5f9",
+          200: "#e2e8f0",
+          300: "#cbd5e1",
+          400: "#94a3b8",
+          500: "#64748b",
+          600: "#475569",
+          700: "#334155",
+          800: "#1e293b",
+          900: "#0f172a",
+          950: "#020617",
+        },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        mono: ["JetBrains Mono", "SF Mono", "monospace"],
-      },
-      borderRadius: {
-        sm: "4px",
-        md: "6px",
-        lg: "8px",
-      },
-      boxShadow: {
-        sm: "0 1px 2px rgba(0,0,0,0.3)",
-        md: "0 4px 12px rgba(0,0,0,0.4)",
-        lg: "0 8px 24px rgba(0,0,0,0.5)",
+        mono: ["JetBrains Mono", "monospace"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       animation: {
-        "secure-pulse": "secure-pulse 2.5s infinite",
-        "alert-pulse": "alert-pulse 3s infinite",
-        "nato-ping": "nato-ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite",
-        "fade-in": "fade-in 0.3s ease",
+        "pulse-glow": "pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "scan-line": "scan-line 8s linear infinite",
+        "ticker": "ticker 30s linear infinite",
+        "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "fade-in": "fade-in 0.3s ease-out",
+        "slide-up": "slide-up 0.4s ease-out",
       },
       keyframes: {
-        "secure-pulse": {
-          "0%, 100%": { opacity: "1", transform: "scale(1)" },
-          "50%": { opacity: "0.5", transform: "scale(0.8)" },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 20px var(--tw-shadow-color)" },
+          "50%": { opacity: "0.5", boxShadow: "0 0 5px var(--tw-shadow-color)" },
         },
-        "alert-pulse": {
-          "0%, 100%": { borderColor: "rgba(220,38,38,0.18)" },
-          "50%": { borderColor: "rgba(220,38,38,0.35)" },
+        "scan-line": {
+          "0%": { transform: "translateY(-100%)" },
+          "100%": { transform: "translateY(100vh)" },
         },
-        "nato-ping": {
-          "0%": { r: "2", opacity: "1" },
-          "100%": { r: "18", opacity: "0" },
+        ticker: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
         "fade-in": {
-          from: { opacity: "0", transform: "translateY(4px)" },
-          to: { opacity: "1", transform: "translateY(0)" },
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
         },
+        "slide-up": {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      backgroundImage: {
+        "grid-pattern":
+          "linear-gradient(to right, #1e2129 1px, transparent 1px), linear-gradient(to bottom, #1e2129 1px, transparent 1px)",
+        "radial-glow":
+          "radial-gradient(ellipse at center, rgba(0,212,255,0.03) 0%, transparent 70%)",
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };
 
 export default config;

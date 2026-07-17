@@ -1,228 +1,335 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import KpiCard from "./KpiCard";
-import NatoPanel from "./NatoPanel";
-import { feedData, regionData, typeData, effectivenessData } from "../data/crisisData";
+import { KpiCard } from "./KpiCard";
+import { NatoPanel } from "./NatoPanel";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import {
+  kpiMetrics,
+  intelFeed,
+  crisisEvents,
+  regionData,
+} from "@/app/data/crisisData";
+import { getThreatColor, getThreatHex, cn } from "@/app/lib/utils";
+import {
+  AlertTriangle,
+  Radio,
+  MapPin,
+  Shield,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 
-export default function SitrepView() {
-  const [alertVisible, setAlertVisible] = useState(true);
-  const [activeCrises, setActiveCrises] = useState(52);
+export function SitrepView() {
+  const [activeAlert, setActiveAlert] = useState(0);
+  const [threatMeter, setThreatMeter] = useState(73);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (Math.random() > 0.7) {
-        setActiveCrises((prev) => prev + (Math.random() > 0.5 ? 1 : 0));
-      }
+    const interval = setInterval(() => {
+      setThreatMeter((prev) => {
+        const change = Math.random() * 4 - 2;
+        return Math.max(0, Math.min(100, prev + change));
+      });
     }, 8000);
-    return () => clearInterval(id);
+    return () => clearInterval(interval);
   }, []);
 
-  const maxRegion = Math.max(...regionData.map((d) => d.value));
-
-  const sevMap: Record<string, string> = {
-    crit: "sev-crit",
-    high: "sev-high",
-    med: "sev-med",
-  };
+  const flashEvents = crisisEvents.filter((e) => e.threatLevel === "FLASH");
 
   return (
-    <div className="animate-fade-in">
-      {/* Alert Flash */}
-      {alertVisible && (
-        <div className="bg-gradient-to-r from-accent-red/[0.06] to-accent-red/[0.02] border border-accent-red/20 rounded-md px-[18px] py-3.5 mb-[18px] flex items-center gap-4 animate-alert-pulse">
-          <div className="w-9 h-9 rounded-full bg-accent-red/15 flex items-center justify-center text-base flex-shrink-0">⚠</div>
-          <div className="flex-1">
-            <div className="text-[13px] font-bold text-accent-red tracking-tight mb-0.5">FLASH TRAFF — CRITICAL ESCALATION DETECTED</div>
-            <div className="text-xs text-text-secondary leading-relaxed">
-              EUCOM: Armored formations confirmed massing 14km east of Kursk (51.7°N 36.2°E). SIGINT intercepts indicate offensive prep window T+48 to T+72 hours. Threat level elevated to CRITICAL.
-            </div>
+    <div className="space-y-4 p-4">
+      {/* Flash Alerts */}
+      {flashEvents.length > 0 && (
+        <div className="rounded-lg border border-crimson/30 bg-crimson/5 p-3">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-crimson animate-pulse" />
+            <span className="text-xs font-mono font-bold text-crimson">
+              FLASH ALERT — {flashEvents.length} ACTIVE
+            </span>
           </div>
-          <button
-            onClick={() => setAlertVisible(false)}
-            className="px-4 py-1.5 rounded-sm border border-accent-red bg-accent-red/10 text-accent-red text-[11px] font-bold cursor-pointer transition-all hover:bg-accent-red hover:text-white flex-shrink-0"
-          >
-            ACKNOWLEDGE
-          </button>
+          <div className="mt-2 space-y-1">
+            {flashEvents.map((event) => (
+              <div
+                key={event.id}
+                className="flex items-center justify-between rounded bg-crimson/10 px-3 py-2"
+              >
+                <div>
+                  <span className="text-[10px] font-mono text-crimson/70">
+                    {event.id}
+                  </span>
+                  <p className="text-xs font-medium text-slate-200">
+                    {event.title}
+                  </p>
+                </div>
+                <Badge variant="flash">{event.threatLevel}</Badge>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* KPI Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-[18px]">
-        <KpiCard
-          label="Active Crises"
-          value={activeCrises.toString()}
-          badge="CRIT"
-          badgeClass="bg-accent-red/10 text-accent-red border border-accent-red/15"
-          valueClass="text-accent-red"
-          delta="▲ 14% (7D)"
-          deltaClass="text-accent-red"
-          variant="critical"
-        />
-        <KpiCard
-          label="Threat Index"
-          value="8.4"
-          badge="HIGH"
-          badgeClass="bg-accent-amber/10 text-accent-amber border border-accent-amber/15"
-          valueClass="text-accent-amber"
-          delta="▲ 0.6 pts"
-          deltaClass="text-accent-red"
-          variant="warning"
-        />
-        <KpiCard
-          label="Affected Pop"
-          value="163.4M"
-          badge="ELEV"
-          badgeClass="bg-accent-amber/10 text-accent-amber border border-accent-amber/15"
-          valueClass="text-cyan"
-          delta="▲ 21.1M new"
-          deltaClass="text-accent-red"
-        />
-        <KpiCard
-          label="Response Units"
-          value="287"
-          badge="NOM"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-accent-green"
-          delta="▼ 23 deployed (24H)"
-          deltaClass="text-accent-green"
-          variant="success"
-        />
-        <KpiCard
-          label="Intel Reports"
-          value="1,247"
-          badge="NOM"
-          badgeClass="bg-accent-green/10 text-accent-green border border-accent-green/15"
-          valueClass="text-cyan"
-          delta="▲ 89 (24H)"
-          deltaClass="text-accent-red"
-        />
-        <KpiCard
-          label="Escalation Risk"
-          value="31"
-          badge="HIGH"
-          badgeClass="bg-accent-amber/10 text-accent-amber border border-accent-amber/15"
-          valueClass="text-accent-amber"
-          delta="▲ 8 alerts"
-          deltaClass="text-accent-red"
-          variant="warning"
-        />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 xl:grid-cols-6">
+        {kpiMetrics.map((metric) => (
+          <KpiCard key={metric.label} metric={metric} />
+        ))}
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4 mb-4">
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Threat Meter */}
         <NatoPanel
-          title="Crisis Distribution by AOR"
-          icon="◈"
-          iconBg="rgba(6,182,212,0.08)"
-          iconColor="#06b6d4"
-          actions={[
-            <button key="7d" className="px-3 py-[5px] rounded-sm border border-border-dim bg-tertiary text-text-muted text-[11px] font-semibold cursor-pointer transition-all hover:border-border-med hover:text-text-secondary active">7D</button>,
-            <button key="30d" className="px-3 py-[5px] rounded-sm border border-border-dim bg-tertiary text-text-muted text-[11px] font-semibold cursor-pointer transition-all hover:border-border-med hover:text-text-secondary">30D</button>,
-            <button key="90d" className="px-3 py-[5px] rounded-sm border border-border-dim bg-tertiary text-text-muted text-[11px] font-semibold cursor-pointer transition-all hover:border-border-med hover:text-text-secondary">90D</button>,
-          ]}
+          title="Threat Assessment"
+          subtitle="Global Threat Index — Real-time"
+          className="lg:col-span-1"
         >
-          <div className="flex items-end gap-2.5 h-[200px] pt-6">
-            {regionData.map((d) => (
-              <div key={d.name} className="flex-1 flex flex-col items-center gap-1.5">
+          <div className="flex flex-col items-center py-4">
+            <div className="relative h-40 w-40">
+              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="#1e2129"
+                  strokeWidth="8"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  fill="none"
+                  stroke="url(#threatGradient)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                  strokeDasharray={`${threatMeter * 2.64} 264`}
+                  className="transition-all duration-1000"
+                />
+                <defs>
+                  <linearGradient id="threatGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="50%" stopColor="#f59e0b" />
+                    <stop offset="100%" stopColor="#ef4444" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-mono font-bold text-slate-100">
+                  {Math.round(threatMeter)}
+                </span>
+                <span className="text-[10px] font-mono text-slate-500">
+                  THREAT INDEX
+                </span>
+              </div>
+            </div>
+            <div className="mt-4 flex w-full gap-1">
+              {["LOW", "MOD", "HIGH", "CRIT", "FLASH"].map((level, i) => (
                 <div
-                  className="w-full rounded-t-sm transition-all hover:brightness-130 relative"
-                  style={{ height: `${(d.value / maxRegion) * 170}px`, background: d.color, minHeight: 4 }}
-                >
-                  <span className="absolute -top-5 left-1/2 -translate-x-1/2 font-mono text-[10px] font-bold text-text-primary whitespace-nowrap">
-                    {d.value}
-                  </span>
-                </div>
-                <span className="font-mono text-[9px] text-text-muted font-semibold uppercase tracking-wide">{d.name}</span>
-              </div>
-            ))}
+                  key={level}
+                  className={cn(
+                    "h-1 flex-1 rounded-full",
+                    i < Math.ceil(threatMeter / 20)
+                      ? i < 2
+                        ? "bg-emerald-500"
+                        : i < 3
+                        ? "bg-amber-500"
+                        : "bg-crimson"
+                      : "bg-surface-elevated"
+                  )}
+                />
+              ))}
+            </div>
           </div>
         </NatoPanel>
 
+        {/* Regional Distribution */}
         <NatoPanel
-          title="Priority Intelligence Feed"
-          icon="◆"
-          iconBg="rgba(220,38,38,0.08)"
-          iconColor="#dc2626"
-          actions={[
-            <button key="all" className="px-3 py-[5px] rounded-sm border border-cyan/25 bg-cyan/[0.08] text-cyan text-[11px] font-semibold cursor-pointer">ALL</button>,
-            <button key="crit" className="px-3 py-[5px] rounded-sm border border-border-dim bg-tertiary text-text-muted text-[11px] font-semibold cursor-pointer transition-all hover:border-border-med hover:text-text-secondary">CRIT</button>,
-          ]}
+          title="Regional Distribution"
+          subtitle="Active Crises by AOR"
+          className="lg:col-span-1"
         >
-          <div className="max-h-[480px] overflow-y-auto scrollbar-nato">
-            {feedData.map((item, idx) => (
-              <div
-                key={idx}
-                className="flex gap-3.5 py-3.5 border-b border-border-dim transition-all cursor-pointer hover:bg-hover -mx-[18px] px-[18px] last:border-b-0"
-              >
-                <div className={`w-[3px] rounded-sm flex-shrink-0 self-stretch min-h-[40px] ${sevMap[item.severity]}`} />
-                <div className="font-mono text-[10px] text-text-muted min-w-[70px] text-right pt-0.5 tracking-wide">{item.time}</div>
-                <div className="flex-1">
-                  <div className="text-[13px] font-semibold mb-1 leading-snug">{item.title}</div>
-                  <div className="text-xs text-text-secondary leading-relaxed mb-2">{item.desc}</div>
-                  <div className="flex gap-2 flex-wrap">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="font-mono text-[9px] font-semibold px-2 py-[3px] rounded-[3px] bg-tertiary text-text-muted border border-border-dim uppercase tracking-wide">
-                        {tag}
-                      </span>
-                    ))}
+          <div className="space-y-3">
+            {regionData.map((region) => (
+              <div key={region.id} className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-3 w-3 text-slate-500" />
+                    <span className="text-xs font-mono text-slate-300">
+                      {region.name}
+                    </span>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </NatoPanel>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <NatoPanel title="Crisis Type Breakdown" icon="◉" iconBg="rgba(139,92,246,0.08)" iconColor="#a855f7">
-          <div className="flex justify-around items-center flex-wrap gap-7 py-3.5">
-            {(() => {
-              const total = typeData.reduce((a, b) => a + b.value, 0);
-              return typeData.map((d) => {
-                const pct = ((d.value / total) * 100).toFixed(0);
-                return (
-                  <div key={d.name} className="text-center">
-                    <div
-                      className="w-[90px] h-[90px] rounded-full flex items-center justify-center mx-auto mb-2.5"
-                      style={{
-                        background: `conic-gradient(${d.color} ${pct}%, #111827 0)`,
-                      }}
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant={region.threatLevel.toLowerCase() as any}
+                      className="text-[9px]"
                     >
-                      <div className="w-16 h-16 rounded-full bg-panel flex items-center justify-center font-mono text-base font-bold" style={{ color: d.color }}>
-                        {pct}%
-                      </div>
-                    </div>
-                    <div className="text-xs font-bold text-text-primary mb-0.5">{d.name}</div>
-                    <div className="font-mono text-[10px] text-text-muted">{d.value} ACTIVE</div>
+                      {region.threatLevel}
+                    </Badge>
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {region.activeCrises}
+                    </span>
                   </div>
-                );
-              });
-            })()}
-          </div>
-        </NatoPanel>
-
-        <NatoPanel title="Response Effectiveness (KPI)" icon="◐" iconBg="rgba(22,163,74,0.08)" iconColor="#16a34a">
-          <div className="py-1">
-            {effectivenessData.map((d) => (
-              <div key={d.name} className="mb-4">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-text-secondary">{d.name}</span>
-                  <span className="font-mono text-[11px] font-bold" style={{ color: d.color }}>
-                    {d.value}%
-                  </span>
                 </div>
-                <div className="h-1.5 bg-tertiary rounded-sm overflow-hidden">
-                  <div
-                    className="h-full rounded-sm transition-all duration-1000"
-                    style={{ width: `${d.value}%`, background: d.color }}
-                  />
-                </div>
+                <Progress value={region.activeCrises * 20} className="h-1" />
               </div>
             ))}
           </div>
         </NatoPanel>
+
+        {/* Live Intel Feed */}
+        <NatoPanel
+          title="Live Intel Feed"
+          subtitle="Streaming — All Sources"
+          className="lg:col-span-1"
+          headerAction={
+            <div className="flex items-center gap-1.5">
+              <Radio className="h-3 w-3 text-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-mono text-emerald-400">
+                LIVE
+              </span>
+            </div>
+          }
+        >
+          <ScrollArea className="h-64">
+            <div className="space-y-3 pr-3">
+              {intelFeed.map((item, i) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "rounded-md border p-2.5 transition-all hover:bg-surface-elevated",
+                    i === activeAlert
+                      ? "border-cyan/20 bg-cyan/5"
+                      : "border-border"
+                  )}
+                  onMouseEnter={() => setActiveAlert(i)}
+                >
+                  <div className="flex items-center justify-between">
+                    <Badge
+                      variant={
+                        item.classification
+                          .toLowerCase()
+                          .replace(" ", "") as any
+                      }
+                      className="text-[9px]"
+                    >
+                      {item.classification}
+                    </Badge>
+                    <span className="text-[9px] font-mono text-slate-600">
+                      {new Date(item.timestamp).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "UTC",
+                      })}{" "}
+                      Z
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs font-medium text-slate-200">
+                    {item.headline}
+                  </p>
+                  <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+                    {item.summary.slice(0, 120)}...
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-[9px] font-mono text-slate-600">
+                      SRC: {item.source}
+                    </span>
+                    <span className="text-[9px] font-mono text-cyan/60">
+                      CONF: {(item.confidence * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </NatoPanel>
       </div>
+
+      {/* Crisis Breakdown Table */}
+      <NatoPanel title="Active Crisis Breakdown" subtitle="All Active Incidents">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  ID
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Event
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Region
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Level
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Category
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Confidence
+                </th>
+                <th className="pb-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500">
+                  Sources
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {crisisEvents.map((event) => (
+                <tr
+                  key={event.id}
+                  className="transition-colors hover:bg-surface-elevated/50"
+                >
+                  <td className="py-2.5 text-[10px] font-mono text-slate-600">
+                    {event.id}
+                  </td>
+                  <td className="py-2.5 text-xs text-slate-200">
+                    {event.title}
+                  </td>
+                  <td className="py-2.5 text-[10px] font-mono text-slate-500">
+                    {event.region}
+                  </td>
+                  <td className="py-2.5">
+                    <Badge
+                      variant={event.threatLevel.toLowerCase() as any}
+                      className="text-[9px]"
+                    >
+                      {event.threatLevel}
+                    </Badge>
+                  </td>
+                  <td className="py-2.5 text-[10px] font-mono text-slate-500">
+                    {event.category}
+                  </td>
+                  <td className="py-2.5">
+                    <div className="flex items-center gap-2">
+                      <Progress
+                        value={event.confidence * 100}
+                        className="h-1 w-16"
+                      />
+                      <span className="text-[10px] font-mono text-slate-500">
+                        {(event.confidence * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-2.5">
+                    <div className="flex gap-1">
+                      {event.sources.map((src) => (
+                        <span
+                          key={src}
+                          className="rounded bg-surface-elevated px-1.5 py-0.5 text-[9px] font-mono text-slate-500"
+                        >
+                          {src}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </NatoPanel>
     </div>
   );
 }

@@ -1,186 +1,463 @@
-export interface FeedItem {
-  time: string;
-  title: string;
-  desc: string;
-  severity: "crit" | "high" | "med";
-  tags: string[];
-}
+import {
+  CrisisEvent,
+  ResourceUnit,
+  IntelFeedItem,
+  PredictionMetric,
+  RegionData,
+  KpiMetric,
+} from "@/app/types";
 
-export const feedData: FeedItem[] = [
+export const crisisEvents: CrisisEvent[] = [
   {
-    time: "162214Z",
-    title: "FLASH: Armored convoy movement detected Kursk Oblast",
-    desc: "IMINT confirms 200+ MBT and IFV formations 14km east of international border. SIGINT intercepts indicate offensive prep window T+48 to T+72 hours. J2 assessment: HIGH probability of escalation.",
-    severity: "crit",
-    tags: ["EUCOM", "IMINT", "SIGINT", "J2"],
+    id: "CRZ-2026-0847",
+    title: "Eastern Mediterranean Naval Standoff",
+    region: "AOR-EASTMED",
+    coordinates: [35.5, 28.0],
+    threatLevel: "HIGH",
+    category: "MARITIME",
+    description:
+      "Increased naval presence detected in Eastern Mediterranean. Three carrier strike groups repositioning. Air defense systems on elevated readiness.",
+    timestamp: "2026-07-16T14:30:00Z",
+    confidence: 0.94,
+    sources: ["SIGINT", "IMINT", "HUMINT"],
   },
   {
-    time: "161833Z",
-    title: "Hurricane Delta intensifies to Category 4",
-    desc: "NHC advisory: Sustained winds 240 km/h, gusts to 285 km/h. Coastal evacuation orders expanded to 5 counties. SOUTHCOM JOC activated. Estimated landfall T+36H.",
-    severity: "crit",
-    tags: ["SOUTHCOM", "NHC", "NAT-DIS"],
+    id: "CRZ-2026-0846",
+    title: "Baltic Cyber Infrastructure Attack",
+    region: "AOR-BALTIC",
+    coordinates: [56.9, 24.1],
+    threatLevel: "CRITICAL",
+    category: "CYBER",
+    description:
+      "Coordinated APT campaign targeting critical infrastructure across Baltic states. Power grid anomalies detected. Attribution: APT29 variant.",
+    timestamp: "2026-07-16T12:15:00Z",
+    confidence: 0.91,
+    sources: ["CYBERCOM", "NCSC", "THREAT_INTEL"],
   },
   {
-    time: "160907Z",
-    title: "Cyber intrusion on ASEAN power grid SCADA",
-    desc: "APT29 indicators detected on critical infrastructure nodes in 3 member states. Defensive cyber operations activated. CISA and NCSC coordinating response. Attribution: 72% confidence.",
-    severity: "high",
-    tags: ["INDOPACOM", "CYBER", "APT29", "CISA"],
+    id: "CRZ-2026-0845",
+    title: "Sahel Humanitarian Corridor Disruption",
+    region: "AOR-SAHEL",
+    coordinates: [17.0, 1.0],
+    threatLevel: "MODERATE",
+    category: "HUMANITARIAN",
+    description:
+      "Armed group activity disrupting aid corridors in Mali-Niger border region. 12,000 civilians affected. UN convoy rerouted.",
+    timestamp: "2026-07-16T09:45:00Z",
+    confidence: 0.87,
+    sources: ["UNOCHA", "NGO_REPORTS", "SATELLITE"],
   },
   {
-    time: "155541Z",
-    title: "UN OCHA convoy crosses into Gaza Strip",
-    desc: "Humanitarian corridor established at Rafah crossing. 400 tonnes medical supplies, 200 tonnes food. IDF coordination confirmed. ETA field hospital T+4H.",
-    severity: "med",
-    tags: ["CENTCOM", "UN-OCHA", "HUM"],
+    id: "CRZ-2026-0844",
+    title: "South China Sea Freedom of Navigation Incident",
+    region: "AOR-INDOPAC",
+    coordinates: [12.0, 114.0],
+    threatLevel: "HIGH",
+    category: "MARITIME",
+    description:
+      "Unsafe maneuver by PLAN vessel during FONOP operation. Closest point of approach: 45 meters. Diplomatic protest filed.",
+    timestamp: "2026-07-16T08:20:00Z",
+    confidence: 0.96,
+    sources: ["7TH_FLEET", "SATELLITE", "AIS"],
   },
   {
-    time: "154219Z",
-    title: "Civil unrest escalation — Caracas",
-    desc: "OSINT confirms 50,000+ demonstrators in Plaza Bolivar. National Guard deployed with tear gas. Road closures on Autopista Regional. US Embassy issuing security alert.",
-    severity: "high",
-    tags: ["SOUTHCOM", "OSINT", "CIV-UNREST"],
+    id: "CRZ-2026-0843",
+    title: "Arctic SAR Operation - Missing Research Vessel",
+    region: "AOR-ARCTIC",
+    coordinates: [78.5, -15.0],
+    threatLevel: "MODERATE",
+    category: "SAR",
+    description:
+      "Norwegian research vessel overdue by 72 hours. Last known position: 78°30'N 15°00'W. Joint SAR operation initiated.",
+    timestamp: "2026-07-15T22:00:00Z",
+    confidence: 0.82,
+    sources: ["JRCC", "SATELLITE", "COAST_GUARD"],
   },
   {
-    time: "152855Z",
-    title: "Tsunami warning downgraded to advisory",
-    desc: "PTWC: Pacific earthquake aftershocks diminishing. Magnitude aftershock sequence below threshold. Coastal residents may return with caution. Maritime traffic resuming.",
-    severity: "med",
-    tags: ["INDOPACOM", "PTWC", "NAT-DIS"],
+    id: "CRZ-2026-0842",
+    title: "FLASH: Eastern European Border Mobilization",
+    region: "AOR-EASTEU",
+    coordinates: [50.4, 30.5],
+    threatLevel: "FLASH",
+    category: "CONVENTIONAL",
+    description:
+      "Large-scale mechanized unit movement detected near border. Satellite imagery confirms division-level redeployment. NATO alert level elevated to DEFCON 3.",
+    timestamp: "2026-07-16T16:00:00Z",
+    confidence: 0.98,
+    sources: ["SATELLITE", "SIGINT", "HUMINT", "OSINT"],
   },
   {
-    time: "151522Z",
-    title: "Back-channel ceasefire negotiations initiated",
-    desc: "Qatar-mediated talks between conflicting parties confirmed. Third-party mediator (Norwegian diplomat) en route to Doha. INTEL assessment: 45% probability of 72-hour truce within T+96H.",
-    severity: "med",
-    tags: ["CENTCOM", "DIPLO", "HUMINT"],
+    id: "CRZ-2026-0841",
+    title: "Horn of Africa Piracy Resurgence",
+    region: "AOR-HOA",
+    coordinates: [12.0, 48.0],
+    threatLevel: "HIGH",
+    category: "MARITIME",
+    description:
+      "Three vessel hijackings in Gulf of Aden within 48 hours. Combined Maritime Forces increasing patrols. Insurance premiums spiking.",
+    timestamp: "2026-07-16T06:00:00Z",
+    confidence: 0.89,
+    sources: ["CMF", "UKMTO", "INSURANCE"],
   },
   {
-    time: "145848Z",
-    title: "Red Sea shipping insurance market flash crash",
-    desc: "Lloyd's of London: Marine war risk premiums spiked 340% in 4 hours. 12 vessels rerouted via Cape of Good Hope. Supply chain delay estimate: +14 days. WTO monitoring.",
-    severity: "high",
-    tags: ["GLOBAL", "ECON", "MARITIME"],
-  },
-  {
-    time: "144511Z",
-    title: "DDoS campaign against Baltic state gov portals",
-    desc: "CERT-EU and NATO CCDCOE reporting sustained volumetric attacks. Peak: 1.2 Tbps. Defensive measures holding. Attribution assessment: State-sponsored actor, 89% confidence.",
-    severity: "crit",
-    tags: ["EUCOM", "CYBER", "NATO-CCDCOE"],
-  },
-  {
-    time: "143329Z",
-    title: "Militia movement detected South Sudan border",
-    desc: "HUMINT source H-17 reports irregular forces massing 8km north of Nimule. UNMISS patrols diverting. No engagement reported. J2 monitoring.",
-    severity: "med",
-    tags: ["AFRICOM", "HUMINT", "UNMISS"],
+    id: "CRZ-2026-0840",
+    title: "Pacific Ring of Fire Seismic Event",
+    region: "AOR-INDOPAC",
+    coordinates: [-6.0, 155.0],
+    threatLevel: "MODERATE",
+    category: "NATURAL",
+    description:
+      "Magnitude 7.2 earthquake near Solomon Islands. Tsunami warning issued for regional archipelagos. Humanitarian pre-positioning initiated.",
+    timestamp: "2026-07-16T04:30:00Z",
+    confidence: 0.99,
+    sources: ["USGS", "PTWC", "UNOCHA"],
   },
 ];
 
-export interface RegionData {
-  name: string;
-  value: number;
-  color: string;
-}
+export const resourceUnits: ResourceUnit[] = [
+  {
+    id: "TF-ALPHA",
+    name: "Task Force Alpha",
+    type: "Naval Strike Group",
+    status: "DEPLOYED",
+    location: "Eastern Mediterranean",
+    coordinates: [35.5, 28.0],
+    personnel: 4500,
+    readiness: 94,
+    eta: "ON STATION",
+    mission: "Deterrence & Freedom of Navigation",
+  },
+  {
+    id: "CYBER-1",
+    name: "Cyber Defense Cell",
+    type: "Cyber Operations",
+    status: "DEPLOYED",
+    location: "Tallinn, Estonia",
+    coordinates: [59.4, 24.7],
+    personnel: 120,
+    readiness: 98,
+    eta: "ON STATION",
+    mission: "Baltic Infrastructure Defense",
+  },
+  {
+    id: "SAR-NORTH",
+    name: "Arctic SAR Detachment",
+    type: "Search & Rescue",
+    status: "DEPLOYED",
+    location: "Svalbard, Norway",
+    coordinates: [78.2, 15.6],
+    personnel: 45,
+    readiness: 87,
+    eta: "ON STATION",
+    mission: "Missing Vessel Search Operation",
+  },
+  {
+    id: "QRF-EUROPE",
+    name: "Quick Reaction Force Europe",
+    type: "Mechanized Infantry",
+    status: "STAGING",
+    location: "Poland",
+    coordinates: [52.2, 21.0],
+    personnel: 3200,
+    readiness: 76,
+    eta: "6 HOURS",
+    mission: "Eastern Border Reinforcement",
+  },
+  {
+    id: "AEGIS-PAC",
+    name: "AEGIS Pacific",
+    type: "Missile Defense",
+    status: "DEPLOYED",
+    location: "Guam",
+    coordinates: [13.4, 144.8],
+    personnel: 800,
+    readiness: 99,
+    eta: "ON STATION",
+    mission: "Indo-Pacific Missile Defense",
+  },
+  {
+    id: "HADR-SAHEL",
+    name: "Humanitarian Response Team",
+    type: "Medical & Logistics",
+    status: "STAGING",
+    location: "Niamey, Niger",
+    coordinates: [13.5, 2.1],
+    personnel: 180,
+    readiness: 65,
+    eta: "12 HOURS",
+    mission: "Sahel Corridor Security & Aid",
+  },
+  {
+    id: "SOF-RECCE",
+    name: "Special Operations Recon",
+    type: "Special Forces",
+    status: "STANDBY",
+    location: "Undisclosed",
+    coordinates: [0, 0],
+    personnel: 24,
+    readiness: 100,
+    eta: "2 HOURS",
+    mission: "Classified",
+  },
+  {
+    id: "DRONE-WING",
+    name: "ISR Drone Wing",
+    type: "Unmanned Aerial Systems",
+    status: "DEPLOYED",
+    location: "Djibouti",
+    coordinates: [11.6, 43.1],
+    personnel: 60,
+    readiness: 92,
+    eta: "ON STATION",
+    mission: "Horn of Africa Maritime Surveillance",
+  },
+  {
+    id: "ENG-CORPS",
+    name: "Engineering Corps",
+    type: "Combat Engineering",
+    status: "STANDBY",
+    location: "Germany",
+    coordinates: [50.1, 8.7],
+    personnel: 500,
+    readiness: 88,
+    eta: "24 HOURS",
+    mission: "Infrastructure Hardening",
+  },
+];
+
+export const intelFeed: IntelFeedItem[] = [
+  {
+    id: "INT-2026-1247",
+    classification: "TOP SECRET",
+    timestamp: "2026-07-16T16:00:00Z",
+    source: "NRO / SIGINT",
+    headline: "Division-Level Armor Movement Confirmed",
+    summary:
+      "Satellite imagery confirms 3rd Guards Tank Army repositioning within 15km of border. Estimated 400 MBTs, 200 IFVs. NATO JFC Brunssum activated.",
+    confidence: 0.98,
+    region: "AOR-EASTEU",
+    tags: ["ARMOR", "MOBILIZATION", "DEFCON-3"],
+  },
+  {
+    id: "INT-2026-1246",
+    classification: "SECRET",
+    timestamp: "2026-07-16T14:30:00Z",
+    source: "CYBERCOM / NCSC",
+    headline: "APT29 Infrastructure Mapped",
+    summary:
+      "Active counter-intrusion operation mapped C2 infrastructure for Baltic cyber campaign. 47 nodes identified across 12 jurisdictions. Takedown coordinated.",
+    confidence: 0.91,
+    region: "AOR-BALTIC",
+    tags: ["CYBER", "APT29", "C2"],
+  },
+  {
+    id: "INT-2026-1245",
+    classification: "SECRET",
+    timestamp: "2026-07-16T12:15:00Z",
+    source: "7TH FLEET / N2",
+    headline: "PLAN Vessel Tracking Analysis",
+    summary:
+      "Analysis of unsafe maneuver reveals deliberate provocation pattern. Similar incidents logged 3x in past 72 hours. Rules of engagement under review.",
+    confidence: 0.94,
+    region: "AOR-INDOPAC",
+    tags: ["MARITIME", "FONOP", "PROVOCATION"],
+  },
+  {
+    id: "INT-2026-1244",
+    classification: "CONFIDENTIAL",
+    timestamp: "2026-07-16T10:00:00Z",
+    source: "UNOCHA / FIELD REPORT",
+    headline: "Sahel Aid Corridor Status Update",
+    summary:
+      "NGO convoy successfully rerouted via alternate corridor. 8,000 civilians reached with supplies. Remaining 4,000 in inaccessible zone pending SOF escort.",
+    confidence: 0.85,
+    region: "AOR-SAHEL",
+    tags: ["HUMANITARIAN", "CONVOY", "ACCESS"],
+  },
+  {
+    id: "INT-2026-1243",
+    classification: "SECRET",
+    timestamp: "2026-07-16T08:30:00Z",
+    source: "DIA / HUMINT",
+    headline: "Regional Actor Diplomatic Channels Active",
+    summary:
+      "Back-channel communications detected between regional actors. Mediation proposal via third party under consideration. De-escalation window: 48-72 hours.",
+    confidence: 0.72,
+    region: "AOR-EASTMED",
+    tags: ["DIPLOMACY", "BACKCHANNEL", "DE-ESCALATION"],
+  },
+  {
+    id: "INT-2026-1242",
+    classification: "CONFIDENTIAL",
+    timestamp: "2026-07-16T06:00:00Z",
+    source: "UKMTO / CMF",
+    headline: "Gulf of Aden Piracy Pattern Analysis",
+    summary:
+      "Three hijackings show coordinated tactics: mothership-daughter boat configuration. Intelligence suggests single criminal network. Maritime patrols expanded.",
+    confidence: 0.88,
+    region: "AOR-HOA",
+    tags: ["PIRACY", "MARITIME", "PATTERN"],
+  },
+  {
+    id: "INT-2026-1241",
+    classification: "UNCLASSIFIED",
+    timestamp: "2026-07-16T04:00:00Z",
+    source: "USGS / GEOPHYSICAL",
+    headline: "Solomon Islands Aftershock Sequence",
+    summary:
+      "Aftershock sequence continues with 23 events >M4.5 in past 6 hours. Mainshock re-evaluated to M7.4. Tsunami threat downgraded. Damage assessment ongoing.",
+    confidence: 0.99,
+    region: "AOR-INDOPAC",
+    tags: ["NATURAL", "SEISMIC", "TSUNAMI"],
+  },
+];
+
+export const predictionMetrics: PredictionMetric[] = [
+  {
+    label: "Eastern Europe Escalation",
+    probability: 0.73,
+    trend: [0.45, 0.52, 0.58, 0.61, 0.67, 0.71, 0.73],
+    timeframe: "72H",
+  },
+  {
+    label: "Cyber Campaign Expansion",
+    probability: 0.68,
+    trend: [0.55, 0.57, 0.60, 0.62, 0.65, 0.67, 0.68],
+    timeframe: "48H",
+  },
+  {
+    label: "Maritime Incident (SCS)",
+    probability: 0.41,
+    trend: [0.35, 0.36, 0.37, 0.38, 0.39, 0.40, 0.41],
+    timeframe: "96H",
+  },
+  {
+    label: "Humanitarian Crisis (Sahel)",
+    probability: 0.56,
+    trend: [0.42, 0.45, 0.48, 0.50, 0.52, 0.54, 0.56],
+    timeframe: "7D",
+  },
+  {
+    label: "Arctic SAR Resolution",
+    probability: 0.34,
+    trend: [0.20, 0.22, 0.25, 0.28, 0.30, 0.32, 0.34],
+    timeframe: "48H",
+  },
+];
 
 export const regionData: RegionData[] = [
-  { name: "EUCOM", value: 14, color: "#dc2626" },
-  { name: "CENTCOM", value: 11, color: "#dc2626" },
-  { name: "AFRICOM", value: 9, color: "#f59e0b" },
-  { name: "INDOPACOM", value: 8, color: "#f59e0b" },
-  { name: "SOUTHCOM", value: 6, color: "#06b6d4" },
-  { name: "GLOBAL", value: 4, color: "#06b6d4" },
+  {
+    id: "AOR-EASTEU",
+    name: "Eastern Europe",
+    aor: "JFC Brunssum",
+    threatLevel: "FLASH",
+    activeCrises: 1,
+    personnelDeployed: 3200,
+    lastUpdate: "2026-07-16T16:00:00Z",
+  },
+  {
+    id: "AOR-BALTIC",
+    name: "Baltic States",
+    aor: "MNC NE",
+    threatLevel: "CRITICAL",
+    activeCrises: 1,
+    personnelDeployed: 120,
+    lastUpdate: "2026-07-16T12:15:00Z",
+  },
+  {
+    id: "AOR-EASTMED",
+    name: "Eastern Mediterranean",
+    aor: "JFC Naples",
+    threatLevel: "HIGH",
+    activeCrises: 1,
+    personnelDeployed: 4500,
+    lastUpdate: "2026-07-16T14:30:00Z",
+  },
+  {
+    id: "AOR-INDOPAC",
+    name: "Indo-Pacific",
+    aor: "USPACOM",
+    threatLevel: "HIGH",
+    activeCrises: 2,
+    personnelDeployed: 860,
+    lastUpdate: "2026-07-16T08:20:00Z",
+  },
+  {
+    id: "AOR-SAHEL",
+    name: "Sahel Region",
+    aor: "AFRICOM",
+    threatLevel: "MODERATE",
+    activeCrises: 1,
+    personnelDeployed: 180,
+    lastUpdate: "2026-07-16T09:45:00Z",
+  },
+  {
+    id: "AOR-HOA",
+    name: "Horn of Africa",
+    aor: "CJTF-HOA",
+    threatLevel: "HIGH",
+    activeCrises: 1,
+    personnelDeployed: 60,
+    lastUpdate: "2026-07-16T06:00:00Z",
+  },
+  {
+    id: "AOR-ARCTIC",
+    name: "Arctic",
+    aor: "JFC Norfolk",
+    threatLevel: "MODERATE",
+    activeCrises: 1,
+    personnelDeployed: 45,
+    lastUpdate: "2026-07-15T22:00:00Z",
+  },
 ];
 
-export interface TypeData {
-  name: string;
-  value: number;
-  color: string;
-}
-
-export const typeData: TypeData[] = [
-  { name: "Conflict", value: 21, color: "#dc2626" },
-  { name: "Natural Disaster", value: 13, color: "#f59e0b" },
-  { name: "Cyber", value: 9, color: "#a855f7" },
-  { name: "Humanitarian", value: 7, color: "#06b6d4" },
-  { name: "Economic", value: 2, color: "#16a34a" },
+export const kpiMetrics: KpiMetric[] = [
+  { label: "Active Crises", value: 8, change: 2, trend: "up", unit: "" },
+  { label: "Personnel Deployed", value: "9,065", change: 12, trend: "up", unit: "" },
+  { label: "Threat Level", value: "FLASH", change: 0, trend: "up", unit: "" },
+  { label: "Intel Reports (24H)", value: 247, change: -3, trend: "down", unit: "" },
+  { label: "Resource Readiness", value: "87.3%", change: 1.2, trend: "up", unit: "" },
+  { label: "Prediction Accuracy", value: "91.4%", change: 0.8, trend: "up", unit: "" },
 ];
 
-export interface EffectivenessData {
-  name: string;
-  value: number;
-  color: string;
-}
-
-export const effectivenessData: EffectivenessData[] = [
-  { name: "Medical Response", value: 94, color: "#16a34a" },
-  { name: "Evacuation (NEO)", value: 89, color: "#16a34a" },
-  { name: "Cyber Defense", value: 81, color: "#06b6d4" },
-  { name: "Supply Chain", value: 68, color: "#f59e0b" },
-  { name: "Diplomatic", value: 56, color: "#f59e0b" },
-  { name: "Conflict Mediation", value: 43, color: "#dc2626" },
-];
-
-export interface ResourceData {
-  type: string;
-  name: string;
-  location: string;
-  status: string;
-  progress: number;
-  category: string;
-}
-
-export const resourcesData: ResourceData[] = [
-  { type: "Medical", name: "Field Hospital Alpha (Role 2+)", location: "Rzeszów, PL (50.04°N 22.00°E)", status: "deployed", progress: 96, category: "res-ok" },
-  { type: "Military", name: "V Corps — Rapid Response Bn", location: "Eastern Poland (51.20°N 23.50°E)", status: "deployed", progress: 100, category: "res-crit" },
-  { type: "Humanitarian", name: "UN OCHA Corridor Team Bravo", location: "Rafah Crossing (31.28°N 34.25°E)", status: "staging", progress: 71, category: "res-warn" },
-  { type: "Cyber", name: "NATO CCDCOE Blue Team", location: "Tallinn, EE (59.43°N 24.75°E)", status: "deployed", progress: 92, category: "res-ok" },
-  { type: "Logistics", name: "Air Bridge Op ATLANTIC LIFT", location: "Ramstein AB (49.44°N 7.60°E)", status: "standby", progress: 48, category: "res-info" },
-  { type: "Medical", name: "USNS Comfort (T-AH-20)", location: "Gulf of Mexico (25.00°N 90.00°W)", status: "deployed", progress: 94, category: "res-ok" },
-  { type: "Military", name: "CTF-153 — Naval Task Force", location: "Red Sea (20.00°N 38.00°E)", status: "deployed", progress: 100, category: "res-crit" },
-  { type: "Humanitarian", name: "WFP Emergency Response", location: "Port Sudan (19.62°N 37.22°E)", status: "deployed", progress: 78, category: "res-warn" },
-  { type: "Cyber", name: "NSA/CSS Threat Intel Cell", location: "Fort Meade, MD (39.11°N 76.74°W)", status: "deployed", progress: 97, category: "res-ok" },
-];
-
-export interface IntelRow {
-  time: string;
-  source: string;
-  region: string;
-  classification: string;
-  summary: string;
-  confidence: string;
-  status: string;
-}
-
-export const intelData: IntelRow[] = [
-  { time: "162214Z JUL", source: "SIGINT", region: "EUCOM", classification: "critical", summary: "Encrypted military comms spike 400% — Kursk axis", confidence: "98%", status: "ack" },
-  { time: "161833Z JUL", source: "IMINT", region: "SOUTHCOM", classification: "critical", summary: "Hurricane eye wall formation confirmed — GOES-16", confidence: "99%", status: "ack" },
-  { time: "160907Z JUL", source: "CYBER", region: "INDOPACOM", classification: "high", summary: "C2 beacon detected on ASEAN SCADA network", confidence: "94%", status: "ack" },
-  { time: "155541Z JUL", source: "HUMINT", region: "CENTCOM", classification: "moderate", summary: "UN convoy GPS confirmed at waypoint 7 — Rafah", confidence: "100%", status: "ack" },
-  { time: "154219Z JUL", source: "OSINT", region: "SOUTHCOM", classification: "high", summary: "Geotagged protest imagery: 50k+ crowd — Caracas", confidence: "87%", status: "ack" },
-  { time: "152855Z JUL", source: "IMINT", region: "INDOPACOM", classification: "moderate", summary: "Thermal anomaly reduced 60% post-quake — Pacific", confidence: "92%", status: "ack" },
-  { time: "151522Z JUL", source: "SIGINT", region: "CENTCOM", classification: "moderate", summary: "Diplomatic frequency chatter increase — Doha channel", confidence: "76%", status: "ack" },
-  { time: "145848Z JUL", source: "OSINT", region: "GLOBAL", classification: "high", summary: "Insurance market flash crash — Lloyd's London", confidence: "89%", status: "ack" },
-  { time: "144511Z JUL", source: "CYBER", region: "EUCOM", classification: "critical", summary: "DDoS attack on Baltic state gov portals — 1.2 Tbps", confidence: "96%", status: "pending" },
-  { time: "143329Z JUL", source: "HUMINT", region: "AFRICOM", classification: "moderate", summary: "Local militia movement toward border — South Sudan", confidence: "72%", status: "ack" },
-];
-
-export const trendMonths = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"];
-export const trendValues = [34, 41, 38, 46, 49, 52];
-
-export const mapRegions: Record<string, { name: string; crises: number; sev: string; sevClass: string; lat: string; lon: string }> = {
-  na: { name: "NORTH AMERICA", crises: 4, sev: "NORMAL", sevClass: "nb-med", lat: "45.000°N", lon: "100.000°W" },
-  sa: { name: "SOUTH AMERICA", crises: 6, sev: "ELEVATED", sevClass: "nb-high", lat: "15.000°S", lon: "60.000°W" },
-  eu: { name: "EUROPE (EUCOM)", crises: 14, sev: "CRITICAL", sevClass: "nb-crit", lat: "50.000°N", lon: "15.000°E" },
-  ru: { name: "RUSSIA / CENTRAL ASIA", crises: 8, sev: "CRITICAL", sevClass: "nb-crit", lat: "60.000°N", lon: "60.000°E" },
-  me: { name: "MIDDLE EAST (CENTCOM)", crises: 11, sev: "CRITICAL", sevClass: "nb-crit", lat: "30.000°N", lon: "45.000°E" },
-  ea: { name: "EAST AFRICA (AFRICOM)", crises: 9, sev: "ELEVATED", sevClass: "nb-high", lat: "5.000°N", lon: "35.000°E" },
-  nafr: { name: "NORTH AFRICA (AFRICOM)", crises: 5, sev: "ELEVATED", sevClass: "nb-high", lat: "25.000°N", lon: "10.000°E" },
-  "sa-asia": { name: "SOUTH ASIA (INDOPACOM)", crises: 8, sev: "ELEVATED", sevClass: "nb-high", lat: "25.000°N", lon: "80.000°E" },
-  sea: { name: "SOUTHEAST ASIA (INDOPACOM)", crises: 6, sev: "ELEVATED", sevClass: "nb-high", lat: "10.000°N", lon: "110.000°E" },
-  "ea-asia": { name: "EAST ASIA (INDOPACOM)", crises: 7, sev: "NORMAL", sevClass: "nb-med", lat: "35.000°N", lon: "120.000°E" },
-  oc: { name: "OCEANIA (INDOPACOM)", crises: 2, sev: "NORMAL", sevClass: "nb-med", lat: "25.000°S", lon: "140.000°E" },
-  ca: { name: "CENTRAL AMERICA (SOUTHCOM)", crises: 5, sev: "ELEVATED", sevClass: "nb-high", lat: "15.000°N", lon: "90.000°W" },
+export const worldMapPaths = {
+  // Simplified world map SVG paths for major landmasses
+  regions: [
+    {
+      id: "na",
+      name: "North America",
+      path: "M50,80 L280,60 L320,120 L300,200 L200,220 L100,180 L50,80Z",
+      crises: 0,
+    },
+    {
+      id: "sa",
+      name: "South America",
+      path: "M220,240 L320,230 L340,320 L280,420 L240,380 L220,240Z",
+      crises: 0,
+    },
+    {
+      id: "eu",
+      name: "Europe",
+      path: "M420,60 L520,50 L560,90 L540,140 L480,150 L440,130 L420,60Z",
+      crises: 3,
+    },
+    {
+      id: "af",
+      name: "Africa",
+      path: "M440,160 L540,150 L580,220 L560,320 L500,360 L460,300 L440,220 L440,160Z",
+      crises: 2,
+    },
+    {
+      id: "as",
+      name: "Asia",
+      path: "M560,50 L780,40 L860,100 L840,200 L720,220 L640,180 L580,120 L560,50Z",
+      crises: 2,
+    },
+    {
+      id: "au",
+      name: "Australia",
+      path: "M720,300 L820,290 L840,350 L780,380 L720,360 L720,300Z",
+      crises: 0,
+    },
+  ],
 };

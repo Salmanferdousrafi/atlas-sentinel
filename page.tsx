@@ -1,38 +1,48 @@
 "use client";
 
 import { useState } from "react";
-import ClassificationBanner from "./components/ClassificationBanner";
-import CommandBar from "./components/CommandBar";
-import SubNav from "./components/SubNav";
-import SitrepView from "./components/SitrepView";
-import CopView from "./components/CopView";
-import FuseView from "./components/FuseView";
-import LogstatView from "./components/LogstatView";
-import IntelView from "./components/IntelView";
-
-export type ViewName = "overview" | "map" | "analytics" | "resources" | "intelligence";
-export type TheaterName = "global" | "europe" | "pacific" | "central" | "africa" | "south";
+import { CommandBar } from "./components/CommandBar";
+import { ClassificationBanner } from "./components/ClassificationBanner";
+import { SubNav } from "./components/SubNav";
+import { SitrepView } from "./components/SitrepView";
+import { CopView } from "./components/CopView";
+import { FuseView } from "./components/FuseView";
+import { LogstatView } from "./components/LogstatView";
+import { IntelView } from "./components/IntelView";
+import { ChatInterface } from "./components/chat/ChatInterface";
+import { SatelliteVisualization } from "./components/orbit/SatelliteVisualization";
 
 export default function Home() {
-  const [activeView, setActiveView] = useState<ViewName>("overview");
-  const [activeTheater, setActiveTheater] = useState<TheaterName>("global");
+  const [activeView, setActiveView] = useState("sitrep");
 
-  const views: Record<ViewName, React.ReactNode> = {
-    overview: <SitrepView />,
-    map: <CopView />,
-    analytics: <FuseView />,
-    resources: <LogstatView />,
-    intelligence: <IntelView />,
+  const renderView = () => {
+    switch (activeView) {
+      case "sitrep":
+        return <SitrepView />;
+      case "cop":
+        return <CopView />;
+      case "orbit":
+        return <SatelliteVisualization />;
+      case "fuse":
+        return <FuseView />;
+      case "logstat":
+        return <LogstatView />;
+      case "intel":
+        return <IntelView />;
+      case "agents":
+        return <ChatInterface />;
+      default:
+        return <SitrepView />;
+    }
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-primary font-sans">
-      <ClassificationBanner />
-      <CommandBar activeTheater={activeTheater} onTheaterChange={setActiveTheater} />
+    <div className="min-h-screen bg-void text-slate-200">
+      <ClassificationBanner level="SECRET" />
+      <CommandBar />
       <SubNav activeView={activeView} onViewChange={setActiveView} />
-      <main className="pt-[126px] pb-9 px-7">
-        <div className="animate-fade-in">{views[activeView]}</div>
-      </main>
+      <main className="scan-line">{renderView()}</main>
+      <ClassificationBanner level="SECRET" />
     </div>
   );
 }
